@@ -1,5 +1,11 @@
 import React, {Component} from 'react';
 import './App.css'
+import Button from 'material-ui/Button';
+import TextField from 'material-ui/TextField'
+import List, {
+  ListItem,
+  ListItemText,
+} from 'material-ui/List';
 
 class App extends Component {
   constructor() {
@@ -9,12 +15,19 @@ class App extends Component {
       searchTerm: null,
       searchResultItems: null
     }
+  }
 
-    fetch('https://www.googleapis.com/youtube/v3/commentThreads?part=snippet&videoId=IiZ0UBpKpSk&key=AIzaSyBJlwL6yH1qcDJ4A89a0Ap_5ZSk4z0d3Ws')
+  updateSearchTerm = event => {
+    this.setState({searchTerm: event.target.value})
+  }
+
+  performSearch = () => {
+    if (!this.state.searchTerm) return false
+
+    fetch(`https://www.googleapis.com/youtube/v3/commentThreads?part=snippet&videoId=${this.state.searchTerm}&key=AIzaSyBJlwL6yH1qcDJ4A89a0Ap_5ZSk4z0d3Ws`)
       .then(results => {
         return results.json()
       }).then(data => {
-      console.log(data.items)
       this.setState({
         searchResultItems: data.items,
         nextPageToken: data.nextPageToken,
@@ -23,28 +36,21 @@ class App extends Component {
     })
   }
 
-  updateSearchTerm = event => {
-    this.setState({searchTerm: event.target.value})
-  }
-
-  renderResults () {
+  renderResults() {
     if (!this.state.searchResultItems) return null;
     return (
-      <ul>
+      <List dense={true}>
         {this.state.searchResultItems.map((data, index) => {
           return (
-            <li key={data.id} className={'searchResultsListItem'}>
-              {
-                `
-                ${data.snippet.topLevelComment.snippet.authorDisplayName}
-                -
-                ${data.snippet.topLevelComment.snippet.textDisplay}
-                `
-              }
-            </li>
+            <ListItem key={data.id}>
+              <ListItemText
+                primary={data.snippet.topLevelComment.snippet.textDisplay}
+                secondary={data.snippet.topLevelComment.snippet.authorDisplayName}
+              />
+            </ListItem>
           )
-        })}
-      </ul>
+        })}}
+      </List>
     )
   }
 
@@ -52,11 +58,8 @@ class App extends Component {
     return (
       <div>
         <div>
-          <input onChange={event => this.updateSearchTerm(event)} type="search"/>
-          <button>Search</button>
-          <p className="App-intro">
-            This is test
-          </p>
+          <TextField type={'search'} label={'Youtube video ID'} onChange={event => this.updateSearchTerm(event)}/>
+          <Button variant="raised" color="primary" onClick={this.performSearch}>Search</Button>
         </div>
         <div>
           {this.renderResults()}
