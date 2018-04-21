@@ -1,20 +1,50 @@
 import React, {Component} from 'react';
 import './App.css'
+import {withStyles} from 'material-ui/styles';
+import AppBar from 'material-ui/AppBar';
+import Toolbar from 'material-ui/Toolbar';
 import Button from 'material-ui/Button';
 import TextField from 'material-ui/TextField'
+import Typography from 'material-ui/Typography';
 import List, {
   ListItem,
   ListItemText,
 } from 'material-ui/List';
+import {stringify} from 'query-string'
+
+const styles = {
+  root: {
+    flexGrow: 1,
+  },
+  flex: {
+    flex: 1,
+  },
+  searchBar: {
+    marginLeft: 20,
+    marginRight: 20,
+    flexGrow: 1
+  },
+  searchBox: {
+    flex: 1
+  },
+  searchButton: {}
+};
+
+const youtubeApi = 'https://www.googleapis.com/youtube/v3'
 
 class App extends Component {
   constructor() {
     super()
 
     this.state = {
-      searchTerm: null,
-      searchResultItems: null
+      videoId: null,
+      searchResultItems: null,
+      searchTerm: null
     }
+  }
+
+  updateVideoId = event => {
+    this.setState({videoId: event.target.value})
   }
 
   updateSearchTerm = event => {
@@ -22,9 +52,17 @@ class App extends Component {
   }
 
   performSearch = () => {
-    if (!this.state.searchTerm) return false
+    if (!this.state.videoId) return false
 
-    fetch(`https://www.googleapis.com/youtube/v3/commentThreads?part=snippet&videoId=${this.state.searchTerm}&key=AIzaSyBJlwL6yH1qcDJ4A89a0Ap_5ZSk4z0d3Ws`)
+    let searchObj = {
+      part: 'snippet',
+      videoId: this.state.videoId,
+      key: 'AIzaSyBJlwL6yH1qcDJ4A89a0Ap_5ZSk4z0d3Ws',
+      searchTerm: (this.state.searchTerm) ? this.state.searchTerm : null
+    }
+    console.log(searchObj)
+
+    fetch(`${youtubeApi}/commentThreads?${stringify(searchObj)}`)
       .then(results => {
         return results.json()
       }).then(data => {
@@ -56,10 +94,34 @@ class App extends Component {
 
   render() {
     return (
-      <div>
-        <div>
-          <TextField type={'search'} label={'Youtube video ID'} onChange={event => this.updateSearchTerm(event)}/>
-          <Button variant="raised" color="primary" onClick={this.performSearch}>Search</Button>
+      <div className={this.props.classes.root}>
+        <div className={this.props.classes.searchBar}>
+          <TextField
+            className={this.props.classes.searchBox}
+            type={'text'}
+            label={'Youtube video ID'}
+            helperText={'e.g. gocwRvLhDf8'}
+            required={true}
+            onChange={event => this.updateVideoId(event)}
+          />
+          <TextField
+            className={this.props.classes.searchBox}
+            type={'search'}
+            label={'Search term'}
+            helperText={'e.g. song'}
+            required={false}
+            onChange={event => this.updateSearchTerm(event)}
+          />
+          <Button
+            className={this.props.classes.searchButton}
+            variant="raised"
+            color="primary"
+            onClick={this.performSearch}
+          >
+            Search
+          </Button>
+        </div>
+        <div className={'header'}>
         </div>
         <div>
           {this.renderResults()}
@@ -69,4 +131,5 @@ class App extends Component {
   }
 }
 
-export default App;
+// export default App;
+export default withStyles(styles)(App);
