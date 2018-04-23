@@ -28,7 +28,11 @@ const styles = {
   searchBox: {
     flex: 1
   },
-  searchButton: {}
+  searchButton: {},
+  searchResultsList: {
+    overflow: 'auto',
+    maxHeight: 300
+  }
 };
 
 const youtubeApi = 'https://www.googleapis.com/youtube/v3'
@@ -60,7 +64,7 @@ class App extends Component {
       videoId: this.state.videoId,
       key: 'AIzaSyBJlwL6yH1qcDJ4A89a0Ap_5ZSk4z0d3Ws',
       searchTerms: (this.state.searchTerm) ? this.state.searchTerm : null,
-      maxResults: 4
+      maxResults: 6
     }
     // console.log(searchObj)
 
@@ -80,7 +84,7 @@ class App extends Component {
   renderResults() {
     if (!this.state.searchResultItems) return null;
     return (
-      <List dense={true}>
+      <List dense={true} className={this.props.classes.searchResultsList}>
         {this.state.searchResultItems.map((data, index) => {
           const timestamp = data.snippet.topLevelComment.snippet.publishedAt
           return (
