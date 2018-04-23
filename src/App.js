@@ -59,7 +59,8 @@ class App extends Component {
       part: 'snippet',
       videoId: this.state.videoId,
       key: 'AIzaSyBJlwL6yH1qcDJ4A89a0Ap_5ZSk4z0d3Ws',
-      searchTerms: (this.state.searchTerm) ? this.state.searchTerm : null
+      searchTerms: (this.state.searchTerm) ? this.state.searchTerm : null,
+      maxResults: 4
     }
     // console.log(searchObj)
 
@@ -67,7 +68,7 @@ class App extends Component {
       .then(results => {
         return results.json()
       }).then(data => {
-      // console.log(data)
+      console.log(data)
       this.setState({
         searchResultItems: data.items,
         nextPageToken: data.nextPageToken,
@@ -82,7 +83,6 @@ class App extends Component {
       <List dense={true}>
         {this.state.searchResultItems.map((data, index) => {
           const timestamp = data.snippet.topLevelComment.snippet.publishedAt
-          console.log(timestamp)
           return (
             <ListItem key={data.id}>
               <ListItemText
@@ -91,7 +91,7 @@ class App extends Component {
               />
             </ListItem>
           )
-        })}}
+        })}
       </List>
     )
   }
