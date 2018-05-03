@@ -56,7 +56,7 @@ class App extends Component {
     this.setState({searchTerm: event.target.value})
   }
 
-  performSearch = () => {
+  performSearch = (nextPage) => {
     if (!this.state.videoId) return false
 
     let searchObj = {
@@ -64,7 +64,8 @@ class App extends Component {
       videoId: this.state.videoId,
       key: 'AIzaSyBJlwL6yH1qcDJ4A89a0Ap_5ZSk4z0d3Ws',
       searchTerms: (this.state.searchTerm) ? this.state.searchTerm : null,
-      maxResults: 6
+      maxResults: 6,
+      nextPageToken: (this.state.nextPageToken && nextPage) ? this.state.nextPageToken : null
     }
     // console.log(searchObj)
 
@@ -76,7 +77,8 @@ class App extends Component {
       this.setState({
         searchResultItems: data.items,
         nextPageToken: data.nextPageToken,
-        pageInfo: data.pageInfo
+        pageInfo: data.pageInfo,
+        nextPageToken: data.nextPageToken
       })
     })
   }
@@ -108,7 +110,7 @@ class App extends Component {
             className={this.props.classes.searchBox}
             type={'text'}
             label={'Youtube video ID'}
-            helperText={'e.g. gocwRvLhDf8'}
+            helperText={'e.g. kJQP7kiw5Fk'}
             required={true}
             onChange={event => this.updateVideoId(event)}
           />
