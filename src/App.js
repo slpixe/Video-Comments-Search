@@ -1,17 +1,15 @@
 import React, {Component} from 'react';
 import './App.css'
 import {withStyles} from 'material-ui/styles';
-import AppBar from 'material-ui/AppBar';
-import Toolbar from 'material-ui/Toolbar';
 import Button from 'material-ui/Button';
 import TextField from 'material-ui/TextField'
-import Typography from 'material-ui/Typography';
 import List, {
   ListItem,
   ListItemText,
 } from 'material-ui/List';
 import {stringify} from 'query-string'
 import * as moment from 'moment'
+import YoutubeList from './components/youtubeList/YoutubeList'
 
 const styles = {
   root: {
@@ -77,8 +75,7 @@ class App extends Component {
       this.setState({
         searchResultItems: data.items,
         nextPageToken: data.nextPageToken,
-        pageInfo: data.pageInfo,
-        nextPageToken: data.nextPageToken
+        pageInfo: data.pageInfo
       })
     })
   }
@@ -105,6 +102,11 @@ class App extends Component {
   render() {
     return (
       <div className={this.props.classes.root}>
+        <YoutubeList
+          items={this.state.searchResultItems}
+          pageNumber={this.state.pageInfo}
+          search={this.performSearch}
+        />
         <div className={this.props.classes.searchBar}>
           <TextField
             className={this.props.classes.searchBox}
