@@ -5,27 +5,34 @@ import 'react-virtualized/styles.css'; // only needs to be imported once
 const STATUS_LOADING = 1;
 const STATUS_LOADED = 2;
 
-const list = [
-  {name: 'a'},
-  {name: 'b'},
-  {name: 'c'},
-  {name: 'd'},
-  {name: 'e'},
-  {name: 'f'},
-  {name: 'g'},
-  {name: 'h'},
-  {name: 'i'},
-  {name: 'j'},
-  {name: 'k'},
-  {name: 'l'},
-  {name: 'm'},
-  {name: 'n'},
-  {name: 'o'},
-  {name: 'p'},
-  {name: 'q'},
-  {name: 'r'},
-  {name: 's'},
-]
+// const list = [
+//   {name: 'a', size: 20},
+//   {name: 'b'},
+//   {name: 'c'},
+//   {name: 'd'},
+//   {name: 'e'},
+//   {name: 'f'},
+//   {name: 'g'},
+//   {name: 'h'},
+//   {name: 'i'},
+//   {name: 'j'},
+//   {name: 'k'},
+//   {name: 'l'},
+//   {name: 'm'},
+//   {name: 'n'},
+//   {name: 'o'},
+//   {name: 'p'},
+//   {name: 'q'},
+//   {name: 'r'},
+//   {name: 's'},
+//   {name: 't'},
+//   {name: 'u'},
+//   {name: 'v'},
+//   {name: 'w'},
+//   {name: 'x'},
+//   {name: 'y'},
+//   {name: 'z'},
+// ]
 
 class YoutubeList extends Component {
   state = {
@@ -36,10 +43,23 @@ class YoutubeList extends Component {
 
   timeoutIdMap = {};
 
+  list = this.props.items;
+
+  componentWillUnmount() {
+    Object.keys(this.timeoutIdMap).forEach(timeoutId => {
+      clearTimeout(timeoutId);
+    });
+  }
+
   loadMoreRows = ({startIndex, stopIndex}) => {
-    console.log('loadMoreRows')
     const {loadedRowsMap, loadingRowCount} = this.state;
     const increment = stopIndex - startIndex + 1;
+
+    console.log('loadMoreRows', startIndex, stopIndex, increment)
+    console.log('loadMoreRows-loadedMap', loadedRowsMap, loadingRowCount)
+    console.log('loadMoreRows-loadingRowCount', loadingRowCount)
+
+    this.props.search(true)
 
     for (var i = startIndex; i <= stopIndex; i++) {
       loadedRowsMap[i] = STATUS_LOADING;
@@ -75,30 +95,53 @@ class YoutubeList extends Component {
     });
   }
 
+  // loadMoreRows = ({startIndex, stopIndex}) => {
+    // this.props.search(true)
+
+    // let promiseResolver;
+    //
+    // return new Promise(resolve => {
+    //   promiseResolver = resolve;
+    // });
+  // }
+
   isRowLoaded = ({ index }) => {
     // return !!list[index];
     const {loadedRowsMap} = this.state;
+    // console.log('isRowLoaded', !!loadedRowsMap[index]);
     return !!loadedRowsMap[index]; // STATUS_LOADING or STATUS_LOADED
   }
 
   rowRenderer = ({index, key, style}) => {
     const {loadedRowsMap} = this.state;
-    const row = list[index];
+    const row = this.list[index];
+    // console.log("rowRenderer-row", row);
     let content;
 
+    // console.log(row);
+
     if (loadedRowsMap[index] === STATUS_LOADED) {
-      content = row.name;
+      // content = row.name;
+      content = row.snippet.topLevelComment.snippet.textDisplay
     } else {
       content = (
-        <div style={{width: row.size}} />
+        <div style={{width: row.size}}>LOADING</div>
       );
     }
 
+    // console.log('rowRenderer-content', content);
+
     return (
-      <div key={key} style={style}>
+      <div
+        key={key}
+        // key={row.id}
+        style={style}
+      >
         {content}
       </div>
     );
+
+    // const timestamp = data.snippet.topLevelComment.snippet.publishedAt
   }
 
   render () {
@@ -112,7 +155,7 @@ class YoutubeList extends Component {
         <InfiniteLoader
           isRowLoaded={this.isRowLoaded}
           loadMoreRows={this.loadMoreRows}
-          rowCount={list.length}>
+          rowCount={this.list.length}>
           {({onRowsRendered, registerChild}) => (
             <AutoSizer disableHeight>
               {({width}) => (
@@ -120,7 +163,7 @@ class YoutubeList extends Component {
                   ref={registerChild}
                   height={200}
                   onRowsRendered={onRowsRendered}
-                  rowCount={list.length}
+                  rowCount={this.list.length}
                   rowHeight={30}
                   rowRenderer={this.rowRenderer}
                   width={width}
