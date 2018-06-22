@@ -13,7 +13,7 @@ import YoutubeList from './components/youtubeList/YoutubeList'
 
 const styles = {
   root: {
-    flexGrow: 1,
+    height: '100%'
   },
   flex: {
     flex: 1,
@@ -28,8 +28,9 @@ const styles = {
   },
   searchButton: {},
   searchResultsList: {
-    overflow: 'auto',
-    maxHeight: 300
+    // overflow: 'auto',
+    // maxHeight: 300
+    height: '100%'
   }
 };
 
@@ -88,7 +89,7 @@ class App extends Component {
   renderResults () {
     if (!this.state.searchResultItems || this.state.searchResultItems.length === 0) return null;
     return (
-      <div>
+      <div style={{height: '100%'}}>
         <YoutubeList
           items={this.state.searchResultItems}
           pageNumber={this.state.pageInfo}
@@ -114,35 +115,35 @@ class App extends Component {
   render () {
     return (
       <div className={this.props.classes.root}>
-        <div className={this.props.classes.searchBar}>
-          <TextField
-            className={this.props.classes.searchBox}
-            type={'text'}
-            label={'Youtube video ID'}
-            helperText={'e.g. kJQP7kiw5Fk'}
-            required={true}
-            onChange={event => this.updateVideoId(event)}
-          />
-          <TextField
-            className={this.props.classes.searchBox}
-            type={'search'}
-            label={'Search term'}
-            helperText={'e.g. song'}
-            required={false}
-            onChange={event => this.updateSearchTerm(event)}
-          />
-          <Button
-            className={this.props.classes.searchButton}
-            variant="raised"
-            color="primary"
-            onClick={this.performSearch}
-          >
-            Search
-          </Button>
-        </div>
         <div className={'header'}>
+          <div className={this.props.classes.searchBar}>
+            <TextField
+              className={this.props.classes.searchBox}
+              type={'text'}
+              label={'Youtube video ID'}
+              helperText={'e.g. kJQP7kiw5Fk'}
+              required={true}
+              onChange={event => this.updateVideoId(event)}
+            />
+            <TextField
+              className={this.props.classes.searchBox}
+              type={'search'}
+              label={'Search term'}
+              helperText={'e.g. song'}
+              required={false}
+              onChange={event => this.updateSearchTerm(event)}
+            />
+            <Button
+              className={this.props.classes.searchButton}
+              variant="raised"
+              color="primary"
+              onClick={this.performSearch}
+            >
+              Search
+            </Button>
+          </div>
         </div>
-        <div>
+        <div className={this.props.classes.searchResultsList}>
           {this.renderResults()}
         </div>
       </div>

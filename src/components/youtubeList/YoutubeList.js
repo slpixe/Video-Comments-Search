@@ -5,35 +5,6 @@ import 'react-virtualized/styles.css'; // only needs to be imported once
 const STATUS_LOADING = 1;
 const STATUS_LOADED = 2;
 
-// const list = [
-//   {name: 'a', size: 20},
-//   {name: 'b'},
-//   {name: 'c'},
-//   {name: 'd'},
-//   {name: 'e'},
-//   {name: 'f'},
-//   {name: 'g'},
-//   {name: 'h'},
-//   {name: 'i'},
-//   {name: 'j'},
-//   {name: 'k'},
-//   {name: 'l'},
-//   {name: 'm'},
-//   {name: 'n'},
-//   {name: 'o'},
-//   {name: 'p'},
-//   {name: 'q'},
-//   {name: 'r'},
-//   {name: 's'},
-//   {name: 't'},
-//   {name: 'u'},
-//   {name: 'v'},
-//   {name: 'w'},
-//   {name: 'x'},
-//   {name: 'y'},
-//   {name: 'z'},
-// ]
-
 class YoutubeList extends Component {
   state = {
     loadedRowCount: 0,
@@ -95,16 +66,6 @@ class YoutubeList extends Component {
     });
   }
 
-  // loadMoreRows = ({startIndex, stopIndex}) => {
-    // this.props.search(true)
-
-    // let promiseResolver;
-    //
-    // return new Promise(resolve => {
-    //   promiseResolver = resolve;
-    // });
-  // }
-
   isRowLoaded = ({ index }) => {
     // return !!list[index];
     const {loadedRowsMap} = this.state;
@@ -148,7 +109,7 @@ class YoutubeList extends Component {
     const {loadedRowCount, loadingRowCount} = this.state;
 
     return (
-      <div>
+      <div style={{height: '100%'}}>
         <div>
           {loadingRowCount} loading, {loadedRowCount} loaded
         </div>
