@@ -3,42 +3,33 @@ import './App.css'
 import { withStyles } from 'material-ui/styles';
 import Button from 'material-ui/Button';
 import TextField from 'material-ui/TextField'
-import List, {
-  ListItem,
-  ListItemText,
-} from 'material-ui/List';
 import { stringify } from 'query-string'
-import * as moment from 'moment'
 import YoutubeList from './components/youtubeList/YoutubeList'
 
 const styles = {
   root: {
-    height: '100%'
+    height: '100%',
+    display: 'flex',
+    flexDirection: 'column'
   },
-  flex: {
-    flex: 1,
-  },
-  searchBar: {
-    marginLeft: 20,
-    marginRight: 20,
-    flexGrow: 1
-  },
-  searchBox: {
-    flex: 1
+  header: {
+    width: '100%',
+    backgroundColor: 'white',
+    padding: 10
   },
   searchButton: {},
   searchResultsList: {
-    // overflow: 'auto',
-    // maxHeight: 300
-    height: '100%'
+    overflow: 'auto',
+    height: '100%',
+    background: 'url(http://cdn.backgroundhost.com/backgrounds/subtlepatterns/hexellence.png)'
   }
 };
 
 const youtubeApi = 'https://www.googleapis.com/youtube/v3'
 
 class App extends Component {
-  constructor () {
-    super()
+  constructor (props) {
+    super(props)
 
     this.state = {
       videoId: null,
@@ -98,33 +89,31 @@ class App extends Component {
   render () {
     return (
       <div className={this.props.classes.root}>
-        <div className={'header'}>
-          <div className={this.props.classes.searchBar}>
-            <TextField
-              className={this.props.classes.searchBox}
-              type={'text'}
-              label={'Youtube video ID'}
-              helperText={'e.g. kJQP7kiw5Fk'}
-              required={true}
-              onChange={event => this.updateVideoId(event)}
-            />
-            <TextField
-              className={this.props.classes.searchBox}
-              type={'search'}
-              label={'Search term'}
-              helperText={'e.g. song'}
-              required={false}
-              onChange={event => this.updateSearchTerm(event)}
-            />
-            <Button
-              className={this.props.classes.searchButton}
-              variant="raised"
-              color="primary"
-              onClick={this.performSearch}
-            >
-              Search
-            </Button>
-          </div>
+        <div className={this.props.classes.header}>
+          <TextField
+            className={this.props.classes.searchBox}
+            type={'text'}
+            label={'Youtube video ID'}
+            helperText={'e.g. kJQP7kiw5Fk'}
+            required={true}
+            onChange={event => this.updateVideoId(event)}
+          />
+          <TextField
+            className={this.props.classes.searchBox}
+            type={'search'}
+            label={'Search term'}
+            helperText={'e.g. song'}
+            required={false}
+            onChange={event => this.updateSearchTerm(event)}
+          />
+          <Button
+            className={this.props.classes.searchButton}
+            variant="raised"
+            color="primary"
+            onClick={this.performSearch}
+          >
+            Search
+          </Button>
         </div>
         <div className={this.props.classes.searchResultsList}>
           {this.renderResults()}

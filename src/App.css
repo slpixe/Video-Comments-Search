@@ -8,15 +8,6 @@ html, body {
     height: 100%;
 }
 
-.wrapper {
-    margin: 0 20px;
-}
+.searchBar {
 
-.searchResultsList {
-
-}
-
-.searchResultsListItem {
-    margin-top: 10px;
-    margin-bottom: 10px;
 }
