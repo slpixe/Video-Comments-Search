@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import { InfiniteLoader, List, AutoSizer } from 'react-virtualized';
 import 'react-virtualized/styles.css'; // only needs to be imported once
+// import Immutable from 'immutable';
 
 const STATUS_LOADING = 1;
 const STATUS_LOADED = 2;
@@ -26,8 +27,8 @@ class YoutubeList extends Component {
     const {loadedRowsMap, loadingRowCount} = this.state;
     const increment = stopIndex - startIndex + 1;
 
-    console.log('loadMoreRows', startIndex, stopIndex, increment)
-    console.log('loadMoreRows-loadedMap', loadedRowsMap, loadingRowCount)
+    console.log('loadMoreRows Start, Stop, Increment', startIndex, stopIndex, increment)
+    // console.log('loadMoreRows-loadedMap', loadedRowsMap)
     console.log('loadMoreRows-loadingRowCount', loadingRowCount)
 
     this.props.search(true)
@@ -67,45 +68,35 @@ class YoutubeList extends Component {
   }
 
   isRowLoaded = ({ index }) => {
-    // return !!list[index];
     const {loadedRowsMap} = this.state;
-    // console.log('isRowLoaded', !!loadedRowsMap[index]);
     return !!loadedRowsMap[index]; // STATUS_LOADING or STATUS_LOADED
   }
 
   rowRenderer = ({index, key, style}) => {
     const {loadedRowsMap} = this.state;
     const row = this.list[index];
-    // console.log("rowRenderer-row", row);
     let content;
 
-    // console.log(row);
-
     if (loadedRowsMap[index] === STATUS_LOADED) {
-      // content = row.name;
-      content = row.snippet.topLevelComment.snippet.textDisplay
+      content = `${index}: ${row.snippet.topLevelComment.snippet.textDisplay}`
     } else {
       content = (
         <div style={{width: row.size}}>LOADING</div>
       );
     }
 
-    // console.log('rowRenderer-content', content);
-
     return (
       <div
         key={key}
-        // key={row.id}
         style={style}
       >
         {content}
       </div>
     );
-
-    // const timestamp = data.snippet.topLevelComment.snippet.publishedAt
   }
 
   render () {
+    console.log('list length: ', this.props.items.length);
     const {loadedRowCount, loadingRowCount} = this.state;
 
     return (
@@ -116,7 +107,9 @@ class YoutubeList extends Component {
         <InfiniteLoader
           isRowLoaded={this.isRowLoaded}
           loadMoreRows={this.loadMoreRows}
-          rowCount={this.list.length}>
+          minimumBatchSize={30}
+          // rowCount={this.list.length}>
+          rowCount={9999}>
           {({onRowsRendered, registerChild}) => (
             <AutoSizer disableHeight>
               {({width}) => (

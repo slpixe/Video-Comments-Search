@@ -67,15 +67,11 @@ class App extends Component {
       maxResults: 30,
       pageToken: (this.state.nextPageToken && nextPage) ? this.state.nextPageToken : null
     }
-    // console.log(searchObj)
 
     fetch(`${youtubeApi}/commentThreads?${stringify(searchObj)}`)
       .then(results => {
         return results.json()
       }).then(data => {
-
-      console.log(data)
-
       this.setState({
         searchResultItems: [...this.state.searchResultItems, ...data.items],
         // searchResultItems: data.items,
@@ -95,19 +91,6 @@ class App extends Component {
           pageNumber={this.state.pageInfo}
           search={this.performSearch}
         />
-        {/*<List dense={true} className={this.props.classes.searchResultsList}>*/}
-        {/*{this.state.searchResultItems.map((data, index) => {*/}
-        {/*const timestamp = data.snippet.topLevelComment.snippet.publishedAt*/}
-        {/*return (*/}
-        {/*<ListItem key={data.id}>*/}
-        {/*<ListItemText*/}
-        {/*primary={data.snippet.topLevelComment.snippet.textDisplay}*/}
-        {/*secondary={`${data.snippet.topLevelComment.snippet.authorDisplayName} - ${moment(timestamp).fromNow()}`}*/}
-        {/*/>*/}
-        {/*</ListItem>*/}
-        {/*)*/}
-        {/*})}*/}
-        {/*</List>*/}
       </div>
     )
   }
