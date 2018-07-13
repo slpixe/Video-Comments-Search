@@ -6,7 +6,6 @@ class YoutubeList extends Component {
 
   renderItems = () => {
     return this.props.items.map(item => {
-      console.log(item)
       return (
         <div key={item.id} className={'searchItem'}>
           {item.snippet.topLevelComment.snippet.textOriginal}
@@ -16,8 +15,6 @@ class YoutubeList extends Component {
   }
 
   render () {
-    console.log('list length: ', this.props.items);
-
     return (
       <div style={{height: '100%'}}>
         {this.renderItems()}

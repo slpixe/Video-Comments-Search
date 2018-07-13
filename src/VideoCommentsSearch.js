@@ -3,7 +3,7 @@ import './App.css'
 import { withStyles } from 'material-ui/styles';
 import Button from 'material-ui/Button';
 import TextField from 'material-ui/TextField'
-import { stringify } from 'query-string'
+import queryString from 'qs'
 import YoutubeList from './components/youtubeList/YoutubeList'
 import { addUrlProps, UrlQueryParamTypes } from 'react-url-query';
 import history from './history'
@@ -69,7 +69,7 @@ class App extends Component {
       pageToken: (this.state.nextPageToken && nextPage) ? this.state.nextPageToken : null
     }
 
-    fetch(`${youtubeApi}/commentThreads?${stringify(searchObj)}`)
+    fetch(`${youtubeApi}/commentThreads?${queryString.stringify(searchObj)}`)
       .then(results => {
         return results.json()
       }).then(data => {
