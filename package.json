@@ -1,6 +1,7 @@
 {
   "name": "video-comments-search",
   "version": "0.1.0",
+  "homepage": "",
   "private": true,
   "dependencies": {
     "history": "^4.7.2",
@@ -11,6 +12,7 @@
     "react-url-query": "^1.4.0"
   },
   "devDependencies": {
+    "gh-pages": "^1.2.0",
     "react-scripts": "1.1.4"
   },
   "scripts": {
