@@ -11,3 +11,11 @@ html, body {
 .searchBar {
 
 }
+
+.searchItem {
+    padding: 10px;
+    background-color: rgba(211,211,211, 0.5);
+}
+.searchItem:nth-child(even) {
+    background-color: rgba(156,143,107, 0.5);
+}

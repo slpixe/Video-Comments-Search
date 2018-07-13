@@ -53,7 +53,7 @@ class App extends Component {
     let searchObj = {
       part: 'snippet',
       videoId: this.state.videoId,
-      key: 'AIzaSyBJlwL6yH1qcDJ4A89a0Ap_5ZSk4z0d3Ws',
+      key: 'AIzaSyBZwa84Tk3PsDzRYe6GDYfVGXcvSfaYxSo',
       searchTerms: (this.state.searchTerm) ? this.state.searchTerm : null,
       maxResults: 30,
       pageToken: (this.state.nextPageToken && nextPage) ? this.state.nextPageToken : null

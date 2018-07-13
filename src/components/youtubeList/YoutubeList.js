@@ -8,8 +8,8 @@ class YoutubeList extends Component {
     return this.props.items.map(item => {
       console.log(item)
       return (
-        <div key={item.id}>
-          <h1>{item.snippet.topLevelComment.snippet.textDisplay}</h1>
+        <div key={item.id} className={'searchItem'}>
+          {item.snippet.topLevelComment.snippet.textOriginal}
         </div>
       )
     })
