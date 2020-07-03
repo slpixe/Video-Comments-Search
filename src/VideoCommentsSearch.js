@@ -107,6 +107,7 @@ class App extends Component {
             value={this.props.videoId}
             required={true}
             onChange={event => this.updateVideoId(event)}
+            autoFocus
           />
           <TextField
             className={this.props.classes.searchBox}
@@ -119,7 +120,7 @@ class App extends Component {
           />
           <Button
             className={this.props.classes.searchButton}
-            variant="raised"
+            variant="outlined"
             color="primary"
             onClick={this.performSearch}
           >
