@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import './App.css'
-import { withStyles } from 'material-ui/styles';
-import Button from 'material-ui/Button';
-import TextField from 'material-ui/TextField'
+import { withStyles } from '@material-ui/styles';
+import {Button} from '@material-ui/core';
+import {TextField} from '@material-ui/core'
 import queryString from 'qs'
 import YoutubeList from './components/youtubeList/YoutubeList'
 import { addUrlProps, UrlQueryParamTypes } from 'react-url-query';
@@ -63,7 +63,7 @@ class App extends Component {
     let searchObj = {
       part: 'snippet',
       videoId: this.props.videoId,
-      key: 'AIzaSyBZwa84Tk3PsDzRYe6GDYfVGXcvSfaYxSo',
+      key: 'AIzaSyAC3Jyzw0_2_ZcsIZYa51TzN1AjvnyhFKY',
       searchTerms: (this.props.query) ? this.props.query : null,
       maxResults: 30,
       pageToken: (this.state.nextPageToken && nextPage) ? this.state.nextPageToken : null
