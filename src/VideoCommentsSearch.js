@@ -17,7 +17,8 @@ const styles = {
   header: {
     width: '100%',
     backgroundColor: 'white',
-    padding: 10
+    padding: 10,
+    boxSizing: 'border-box'
   },
   searchButton: {},
   searchResultsList: {
