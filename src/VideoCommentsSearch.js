@@ -19,6 +19,12 @@ const styles = {
     padding: 20,
     boxSizing: "border-box",
   },
+  noResults: {
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    height: "100%"
+  },
   searchButton: {},
   searchResultsList: {
     overflow: "auto",
@@ -40,7 +46,7 @@ class App extends Component {
     super(props);
 
     this.state = {
-      searchResultItems: [],
+      searchResultItems: []
     };
   }
 
@@ -77,10 +83,17 @@ class App extends Component {
         return results.json();
       })
       .then((data) => {
+
+        // if(!data.items) {
+        //   this.setState({
+        //     noResults: true
+        //   });
+        // }
+
         this.setState({
-          searchResultItems: [...this.state.searchResultItems, ...data.items],
+          searchResultItems: [...data.items],
           nextPageToken: data.nextPageToken,
-          pageInfo: data.pageInfo,
+          pageInfo: data.pageInfo
         });
       });
   };
@@ -89,8 +102,14 @@ class App extends Component {
     if (
       !this.state.searchResultItems ||
       this.state.searchResultItems.length === 0
-    )
-      return null;
+    ) {
+      return (
+        <div className={this.props.classes.noResults}>
+          No Results found
+        </div>
+      )
+    }
+
     return (
       <div style={{ height: "100%" }}>
         <YoutubeList
