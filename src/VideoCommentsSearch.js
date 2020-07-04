@@ -122,7 +122,7 @@ class App extends Component {
               type={"search"}
               label={"Search term"}
               helperText={"e.g. song"}
-              value={this.props.query}
+              value={this.props.query || ""}
               required={false}
               onChange={(event) => this.updateSearchTerm(event)}
             />
