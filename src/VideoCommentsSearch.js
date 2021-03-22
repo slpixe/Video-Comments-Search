@@ -71,7 +71,7 @@ class App extends Component {
     let searchObj = {
       part: "snippet",
       videoId: this.props.videoId,
-      key: "",
+      key: "AIzaSyC1gZmsaoi4eTBAOOZ--8c4qKB1ZsSobQ0",
       searchTerms: this.props.query ? this.props.query : null,
       maxResults: 30,
       pageToken:
