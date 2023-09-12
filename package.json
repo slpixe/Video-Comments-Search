@@ -4,11 +4,11 @@
   "homepage": "https://slpixe.github.io/Video-Comments-Search",
   "private": true,
   "dependencies": {
-    "@material-ui/core": "^4.11.0",
+    "@material-ui/core": "^4.12.4",
     "history": "^5.0.0",
     "moment": "^2.22.1",
     "qs": "^6.5.2",
-    "react": "^17.0.1",
+    "react": "^18.2.0",
     "react-dom": "^17.0.1",
     "react-url-query": "^1.4.0"
   },
