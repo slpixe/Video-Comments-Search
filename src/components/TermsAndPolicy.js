@@ -5,7 +5,8 @@ const Policy = () => (
     <h1>Terms of Service</h1>
     <p>
       By using this website, you agree to our Terms of Service. 
-      We also use YouTube API Services, and by using this website, 
+      We don't really have any terms of service ourselves, however
+      we use YouTube API Services, and by using this website, 
       you are also agreeing to the YouTube Terms of Service, 
       which can be found <a href="https://www.youtube.com/t/terms">here</a>.
     </p>
@@ -16,7 +17,7 @@ const Policy = () => (
       You can find Google's privacy policy <a href="http://www.google.com/policies/privacy">here</a>.
     </p>
     <p>
-      We do not store, collect, or use any data from our users. 
+      We ourselves do not store, collect, or use any data from our users. 
       However, Google may process and share your data with internal and external parties.
     </p>
     <p>

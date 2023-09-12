@@ -6,6 +6,7 @@ import queryString from "qs";
 import YoutubeList from "./components/youtubeList/YoutubeList";
 import { addUrlProps, UrlQueryParamTypes } from "react-url-query";
 import history from "./history";
+import Policy from "./components/TermsAndPolicy";
 
 const styles = {
   root: {
@@ -84,17 +85,21 @@ class App extends Component {
       })
       .then((data) => {
 
+        console.log('=data.items', data.items);
+
         // if(!data.items) {
         //   this.setState({
         //     noResults: true
         //   });
         // }
 
-        this.setState({
-          searchResultItems: [...data.items],
-          nextPageToken: data.nextPageToken,
-          pageInfo: data.pageInfo
-        });
+        if(data.items) {
+          this.setState({
+            searchResultItems: [...data.items],
+            nextPageToken: data.nextPageToken,
+            pageInfo: data.pageInfo
+          });
+        }
       });
   };
 
@@ -159,6 +164,7 @@ class App extends Component {
         <div className={this.props.classes.searchResultsList}>
           {this.renderResults()}
         </div>
+        <Policy />
       </div>
     );
   }

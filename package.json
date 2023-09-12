@@ -5,6 +5,7 @@
   "private": true,
   "dependencies": {
     "@material-ui/core": "^4.12.4",
+    "@material-ui/styles": "^4.11.5",
     "history": "^5.0.0",
     "moment": "^2.22.1",
     "qs": "^6.5.2",
