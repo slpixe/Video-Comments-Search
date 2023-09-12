@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import VideoCommentsSearch from './VideoCommentsSearch';
+import Policy from './components/TermsAndPolicy';
 import history from './history';
 
 class App extends Component {
@@ -10,7 +11,10 @@ class App extends Component {
 
   render() {
     return (
+      <>
       <VideoCommentsSearch />
+      <Policy />
+      </>
     );
   }
 }
