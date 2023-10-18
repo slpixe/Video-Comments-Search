@@ -21,7 +21,8 @@
     "noFallthroughCasesInSwitch": true,
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
+    "allowJs": true
   },
-  "include": ["src"],
+  "include": ["src", "./.eslintrc.cjs"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
