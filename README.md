@@ -1,7 +1,5 @@
 # Video Comments Search
 
-aaa
-
 ## Purpose
 
 This currently allows you to enter a youtube video id (e.g. `kJQP7kiw5Fk`) and search query to get back all the comments from that listing on Youtube.

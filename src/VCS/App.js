@@ -1,6 +1,15 @@
 import React, { Component } from 'react';
 import VideoCommentsSearch from './VideoCommentsSearch';
 import history from './history';
+import { ThemeProvider, createMuiTheme, makeStyles } from '@material-ui/core/styles';
+
+const theme = createMuiTheme();
+
+const useStyles = makeStyles((theme) => {
+  root: {
+    // some CSS that accesses the theme
+  }
+});
 
 class App extends Component {
   componentDidMount() {
@@ -11,7 +20,9 @@ class App extends Component {
   render() {
     return (
       <>
+      <ThemeProvider theme={theme}>
       <VideoCommentsSearch />
+      </ThemeProvider>
       </>
     );
   }
