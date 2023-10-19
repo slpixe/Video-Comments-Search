@@ -1,17 +1,6 @@
-import {
-  Button,
-  FormControl,
-  FormGroup,
-  FormHelperText,
-  Input,
-  InputLabel,
-  TextField,
-  Toolbar,
-  IconButton,
-} from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
 import BigList from './BigList.tsx';
 import { useState } from 'react';
+import { SearchBar } from './SearchBar/SearchBar.tsx';
 
 export const VideoCommentsSearch: React.FC = () => {
   const [state, setState] = useState({
@@ -43,39 +32,12 @@ export const VideoCommentsSearch: React.FC = () => {
         Send
       </Button> */}
       {/* </FormControl> */}
-      <Toolbar style={{ display: 'flex', justifyContent: 'center' }}>
-        <form onSubmit={handleSubmit}>
-          <TextField
-            helperText="e.g. kJQP7kiw5Fk"
-            id="ident"
-            label="Youtube video ID"
-            style={{ marginRight: '10px' }}
-            type="text"
-            name="textBox1"
-            value={state.textBox1}
-            onChange={handleChange}
-          />
-          <TextField
-            helperText="e.g. song"
-            id="query"
-            label="Search term"
-            style={{ marginRight: '10px' }}
-            type="text"
-            name="textBox2"
-            value={state.textBox2}
-            onChange={handleChange}
-          />
-          <Button
-            variant="contained"
-            size="large"
-            endIcon={<SearchIcon />}
-            style={{ alignSelf: 'start', paddingTop: '14px', paddingBottom: '14px' }}
-            type="submit"
-          >
-            Send
-          </Button>
-        </form>
-      </Toolbar>
+      <SearchBar
+        textBox1={state.textBox1}
+        textBox2={state.textBox2}
+        handleChange={handleChange}
+        handleSubmit={handleSubmit}
+      />
       <BigList />
     </div>
   );
