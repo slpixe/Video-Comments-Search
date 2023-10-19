@@ -1,7 +1,7 @@
 import Container from '@mui/material/Container';
 import Box from '@mui/material/Box';
-import TextField from '@mui/material/TextField';
 import { VideoCommentsSearch } from './components/VideoCommentsSearch';
+import Policy from './components/Policy';
 
 // function Copyright() {
 //   return (
@@ -17,12 +17,17 @@ import { VideoCommentsSearch } from './components/VideoCommentsSearch';
 
 export default function App() {
   return (
-    <Container maxWidth="sm">
-      <Box sx={{ my: 4 }}>
-        <VideoCommentsSearch />
-        {/* <ProTip /> */}
-        {/* <Copyright /> */}
-      </Box>
-    </Container>
+    <>
+      <Container style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', margin: 0, maxWidth: '100%' }}>
+        <Container sx={{ my: 2, flex: '1 0 auto' }}>
+          <Box>
+            <VideoCommentsSearch />
+          </Box>
+        </Container>
+        <Container style={{ flexShrink: 0, maxWidth: '100%', fontSize: '14px' }}>
+          <Policy />
+        </Container>
+      </Container>
+    </>
   );
 }

@@ -10,6 +10,7 @@ import {
   IconButton,
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
+import BigList from './BigList.tsx';
 
 export const VideoCommentsSearch: React.FC = () => {
   return (
@@ -23,7 +24,7 @@ export const VideoCommentsSearch: React.FC = () => {
         Send
       </Button> */}
       {/* </FormControl> */}
-      <Toolbar style={{ display: 'flex', justifyContent: 'space-between' }}>
+      <Toolbar style={{ display: 'flex', justifyContent: 'center' }}>
         <TextField helperText="e.g. kJQP7kiw5Fk" id="ident" label="Youtube video ID" style={{ marginRight: '10px' }} />
         <TextField helperText="e.g. song" id="query" label="Search term" style={{ marginRight: '10px' }} />
         <Button
@@ -35,6 +36,7 @@ export const VideoCommentsSearch: React.FC = () => {
           Send
         </Button>
       </Toolbar>
+      <BigList />
     </div>
   );
 };
