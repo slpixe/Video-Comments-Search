@@ -1,6 +1,7 @@
 import Container from '@mui/material/Container';
 import Box from '@mui/material/Box';
 import { VideoCommentsSearch } from './components/VideoCommentsSearch';
+import { Query } from './components/Query';
 
 export default function App() {
   return (
@@ -11,6 +12,7 @@ export default function App() {
       >
         <Box sx={{ marginTop: 2, flex: '1 0 auto', display: 'flex', flexDirection: 'column' }}>
           <VideoCommentsSearch />
+          <Query />
         </Box>
       </Container>
     </>

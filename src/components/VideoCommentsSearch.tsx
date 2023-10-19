@@ -34,7 +34,6 @@ export const VideoCommentsSearch: React.FC = () => {
         sx={{
           width: '100%',
           height: '100%',
-          bgcolor: 'background.paper',
           display: 'flex',
           flexGrow: 1,
           flexDirection: 'column',
