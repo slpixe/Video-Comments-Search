@@ -2,21 +2,18 @@ import { useQuery, useQueryClient, QueryClient, QueryClientProvider } from '@tan
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 // import { useState } from 'react';
 import axios from 'axios';
+import { useInfiniteQuery } from '@tanstack/react-query';
 import { IYTC } from '../../types';
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 const youtubeApi = 'https://www.googleapis.com/youtube/v3';
-
-let searchObj = {
-  part: 'snippet',
-  videoId: 'ljY02BAnTiY',
-  key: 'AIzaSyC1gZmsaoi4eTBAOOZ--8c4qKB1ZsSobQ0',
-  searchTerms: true ? 'Marley' : '',
-  maxResults: `5`.toString(),
-  // pageToken:
-  //   this.state.nextPageToken && nextPage ? this.state.nextPageToken : null,
-};
-let queryParams = new URLSearchParams(searchObj).toString();
+const thing = 'AIzaSyC1gZmsaoi4eTBAOOZ--8c4qKB1ZsSobQ0';
 
 // const axiosConfig = {
 //   headers: {
@@ -24,8 +21,23 @@ let queryParams = new URLSearchParams(searchObj).toString();
 //   },
 // };
 
-const getComments = async (): Promise<IYTC> => {
-  // const { data } = await axios.get('https://jsonplaceholder.typicode.com/posts');
+let searchObj = {
+  part: 'snippet',
+  videoId: `ljY02BAnTiY`,
+  key: `${thing}`,
+  searchTerms: true ? 'Marley' : '',
+  maxResults: `5`.toString(),
+  pageToken: '',
+};
+
+interface IGetComments {
+  pageToken?: string;
+}
+const getComments = async (props: IGetComments = {}): Promise<IYTC> => {
+  // const pagedSearchObj = { ...searchObj, pageToken: props.pageToken };
+  searchObj.pageToken = props.pageToken || '';
+  const queryParams = new URLSearchParams(searchObj).toString();
+
   const { data } = await axios.get(`${youtubeApi}/commentThreads?${queryParams}`);
   return data;
 };
@@ -39,22 +51,22 @@ const getComments = async (): Promise<IYTC> => {
   }
 })();
 
-function usePosts() {
+function useComments() {
   return useQuery({
-    queryKey: ['posts'],
-    queryFn: getComments,
+    queryKey: [`ytc`, `${searchObj.videoId}`, `${searchObj.pageToken}`],
+    queryFn: () => getComments({ pageToken: '' }),
   });
 }
 
 // function Posts({ setPostId }) {
-function Posts() {
+function Comments() {
   const queryClient = useQueryClient();
-  const { status, data, error, isFetching } = usePosts();
+  const { status, data, error, isFetching } = useComments();
 
   return (
     <div>
-      <h1>Posts</h1>
-      {/* <div>
+      <h1>Comments</h1>
+      <div>
         {status === 'pending' ? (
           'Loading...'
         ) : status === 'error' ? (
@@ -62,15 +74,15 @@ function Posts() {
         ) : (
           <>
             <div>
-              {data.map((post) => (
-                <p key={post.id}>
+              {data.items.map((item) => (
+                <p key={item.id}>
                   <a
                     // onClick={() => setPostId(post.id)}
                     href="#"
                     style={
                       // We can access the query data here to show bold links for
                       // ones that are cached
-                      queryClient.getQueryData(['post', post.id])
+                      queryClient.getQueryData(['post', item.id])
                         ? {
                             fontWeight: 'bold',
                             color: 'green',
@@ -78,7 +90,7 @@ function Posts() {
                         : {}
                     }
                   >
-                    {post.title}
+                    {item.snippet.topLevelComment.snippet.textDisplay}
                   </a>
                 </p>
               ))}
@@ -86,7 +98,7 @@ function Posts() {
             <div>{isFetching ? 'Background Updating...' : ' '}</div>
           </>
         )}
-      </div> */}
+      </div>
     </div>
   );
 }
@@ -96,7 +108,7 @@ export const QueryYT = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <div>QueryYT</div>
-      <Posts />
+      <Comments />
       <ReactQueryDevtools initialIsOpen />
     </QueryClientProvider>
   );
