@@ -1,13 +1,40 @@
-import { FormControl, FormHelperText, Input, InputLabel } from '@mui/material';
+import {
+  Button,
+  FormControl,
+  FormGroup,
+  FormHelperText,
+  Input,
+  InputLabel,
+  TextField,
+  Toolbar,
+  IconButton,
+} from '@mui/material';
+import SearchIcon from '@mui/icons-material/Search';
 
 export const VideoCommentsSearch: React.FC = () => {
   return (
     <div className={'root'}>
-      <FormControl>
-        <InputLabel htmlFor="my-input">Email address</InputLabel>
-        <Input id="my-input" aria-describedby="my-helper-text" />
-        <FormHelperText id="my-helper-text">We'll never share your email.</FormHelperText>
-      </FormControl>
+      {/* <FormControl row> */}
+      {/* <FormGroup row>
+        <TextField helperText="e.g. kJQP7kiw5Fk" id="ident" label="Youtube video ID" />
+        <TextField helperText="e.g. song" id="query" label="Search term" />
+      </FormGroup>
+      <Button variant="contained" size="small" endIcon={<SearchIcon />}>
+        Send
+      </Button> */}
+      {/* </FormControl> */}
+      <Toolbar style={{ display: 'flex', justifyContent: 'space-between' }}>
+        <TextField helperText="e.g. kJQP7kiw5Fk" id="ident" label="Youtube video ID" style={{ marginRight: '10px' }} />
+        <TextField helperText="e.g. song" id="query" label="Search term" style={{ marginRight: '10px' }} />
+        <Button
+          variant="contained"
+          size="large"
+          endIcon={<SearchIcon />}
+          style={{ alignSelf: 'start', paddingTop: '14px', paddingBottom: '14px' }}
+        >
+          Send
+        </Button>
+      </Toolbar>
     </div>
   );
 };
