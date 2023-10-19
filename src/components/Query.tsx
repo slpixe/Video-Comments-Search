@@ -5,13 +5,15 @@ import axios from 'axios';
 
 const queryClient = new QueryClient();
 
+const getPosts = async (): Promise<{ title: string; id: number; userId: number; body: string }[]> => {
+  const { data } = await axios.get('https://jsonplaceholder.typicode.com/posts');
+  return data;
+};
+
 function usePosts() {
   return useQuery({
     queryKey: ['posts'],
-    queryFn: async () => {
-      const { data } = await axios.get('https://jsonplaceholder.typicode.com/posts');
-      return data;
-    },
+    queryFn: getPosts,
   });
 }
 
