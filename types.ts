@@ -1,6 +1,7 @@
 export interface IYTC {
   kind: string;
   etag: string;
+  nextPageToken?: string;
   pageInfo: PageInfo;
   items: Item[];
 }

@@ -42,30 +42,55 @@ const getComments = async (props: IGetComments = {}): Promise<IYTC> => {
   return data;
 };
 
-(async () => {
-  try {
-    const a = await getComments();
-    console.log('===a', a.items[0].snippet.topLevelComment.snippet.textDisplay);
-  } catch (error) {
-    console.error(error);
-  }
-})();
+// (async () => {
+//   try {
+//     const a = await getComments();
+//     console.log('===a', a.items[0].snippet.topLevelComment.snippet.textDisplay);
+//   } catch (error) {
+//     console.error(error);
+//   }
+// })();
 
-function useComments() {
-  return useQuery({
-    queryKey: [`ytc`, `${searchObj.videoId}`, `${searchObj.pageToken}`],
-    queryFn: () => getComments({ pageToken: '' }),
-  });
-}
+// function useComments() {
+//   return useQuery({
+//     queryKey: [`ytc`, `${searchObj.videoId}`, `${searchObj.pageToken}`],
+//     queryFn: () => getComments({ pageToken: '' }),
+//   });
+// }
 
 // function Posts({ setPostId }) {
 function Comments() {
-  const queryClient = useQueryClient();
-  const { status, data, error, isFetching } = useComments();
+  // const queryClient = useQueryClient();
+  // const { status, data, error, isFetching } = useComments();
+
+  const { data, error, fetchNextPage, hasNextPage, isFetching, isFetchingNextPage, status } = useInfiniteQuery({
+    queryKey: [`ytc`, `${searchObj.videoId}`, `${searchObj.pageToken}`],
+    queryFn: ({ pageParam }) => {
+      console.log('=p', pageParam);
+      return getComments({ pageToken: pageParam });
+    },
+    initialPageParam: '',
+    getNextPageParam: (lastPage, pages) => {
+      console.log('=lp', lastPage);
+      console.log('=pages', pages);
+      // return lastPage.nextPageToken;
+      return '';
+    },
+  });
+
+  const fetchCheese = () => {
+    console.log('===cheese');
+  };
 
   return (
     <div>
       <h1>Comments</h1>
+      <button onClick={() => fetchNextPage()} disabled={!hasNextPage || isFetchingNextPage}>
+        FETCH MORE
+      </button>
+      {/* <button onClick={() => fetchCheese()} disabled={!hasNextPage || isFetchingNextPage}>
+        FETCH MORE CHEESE
+      </button> */}
       <div>
         {status === 'pending' ? (
           'Loading...'
@@ -74,7 +99,7 @@ function Comments() {
         ) : (
           <>
             <div>
-              {data.items.map((item) => (
+              {/* {data.items.map((item) => (
                 <p key={item.id}>
                   <a
                     // onClick={() => setPostId(post.id)}
@@ -93,7 +118,7 @@ function Comments() {
                     {item.snippet.topLevelComment.snippet.textDisplay}
                   </a>
                 </p>
-              ))}
+              ))} */}
             </div>
             <div>{isFetching ? 'Background Updating...' : ' '}</div>
           </>
