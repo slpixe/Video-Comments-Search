@@ -1,6 +1,7 @@
-import { Button, TextField, Toolbar } from '@mui/material';
+import { Box, Button, TextField, Toolbar } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import { ChangeEvent, FormEvent } from 'react';
+import PolicyDialog from '../PolicyDialog';
 
 interface IProps {
   handleSubmit: (event: FormEvent<HTMLFormElement>) => void;
@@ -11,7 +12,7 @@ interface IProps {
 
 export const SearchBar = (props: IProps) => {
   return (
-    <Toolbar style={{ display: 'flex', justifyContent: 'center' }}>
+    <Toolbar style={{ display: 'flex', justifyContent: 'center', alignItems: 'baseline' }}>
       <form onSubmit={props.handleSubmit}>
         <TextField
           helperText="e.g. kJQP7kiw5Fk"
@@ -45,6 +46,9 @@ export const SearchBar = (props: IProps) => {
           Send
         </Button>
       </form>
+      <Box sx={{ marginLeft: 'auto' }}>
+        <PolicyDialog />
+      </Box>
     </Toolbar>
   );
 };
