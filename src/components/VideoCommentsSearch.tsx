@@ -1,6 +1,7 @@
 import BigList from './BigList.tsx';
 import { useState } from 'react';
 import { SearchBar } from './SearchBar/SearchBar.tsx';
+import { Box } from '@mui/material';
 
 export const VideoCommentsSearch: React.FC = () => {
   const [state, setState] = useState({
@@ -22,23 +23,25 @@ export const VideoCommentsSearch: React.FC = () => {
   };
 
   return (
-    <div className={'root'}>
-      {/* <FormControl row> */}
-      {/* <FormGroup row>
-        <TextField helperText="e.g. kJQP7kiw5Fk" id="ident" label="Youtube video ID" />
-        <TextField helperText="e.g. song" id="query" label="Search term" />
-      </FormGroup>
-      <Button variant="contained" size="small" endIcon={<SearchIcon />}>
-        Send
-      </Button> */}
-      {/* </FormControl> */}
+    <Box className={'root'} sx={{ display: 'flex', flexGrow: 1, flexDirection: 'column' }}>
       <SearchBar
         textBox1={state.textBox1}
         textBox2={state.textBox2}
         handleChange={handleChange}
         handleSubmit={handleSubmit}
       />
-      <BigList />
-    </div>
+      <Box
+        sx={{
+          width: '100%',
+          height: '100%',
+          bgcolor: 'background.paper',
+          display: 'flex',
+          flexGrow: 1,
+          flexDirection: 'column',
+        }}
+      >
+        <BigList />
+      </Box>
+    </Box>
   );
 };

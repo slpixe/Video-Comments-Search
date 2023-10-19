@@ -19,14 +19,12 @@ export default function App() {
   return (
     <>
       <Container style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', margin: 0, maxWidth: '100%' }}>
-        <Container sx={{ my: 2, flex: '1 0 auto' }}>
-          <Box>
-            <VideoCommentsSearch />
-          </Box>
-        </Container>
-        <Container style={{ flexShrink: 0, maxWidth: '100%', fontSize: '14px' }}>
+        <Box sx={{ my: 2, flex: '1 0 auto', display: 'flex', flexDirection: 'column' }}>
+          <VideoCommentsSearch />
+        </Box>
+        <Box style={{ flexShrink: 0, maxWidth: '100%', fontSize: '14px', display: 'flex', flexDirection: 'column' }}>
           <Policy />
-        </Container>
+        </Box>
       </Container>
     </>
   );
