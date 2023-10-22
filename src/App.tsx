@@ -14,7 +14,7 @@ export default function App() {
         <Box sx={{ marginTop: 2, flex: '1 0 auto', display: 'flex', flexDirection: 'column' }}>
           <VideoCommentsSearch />
           {/* <Query /> */}
-          <QueryYT />
+          {/* <QueryYT /> */}
         </Box>
       </Container>
     </>
