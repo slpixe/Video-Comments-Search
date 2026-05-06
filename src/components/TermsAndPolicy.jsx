@@ -14,7 +14,7 @@ const Policy = () => (
     <h1>Privacy Policy</h1>
     <p>
       This website uses the YouTube API Services. 
-      You can find Google's privacy policy <a href="http://www.google.com/policies/privacy">here</a>.
+      You can find Google's privacy policy <a href="https://policies.google.com/privacy" rel="nofollow noreferrer noopener" target="_blank">here</a>.
     </p>
     <p>
       We ourselves do not store, collect, or use any data from our users. 
