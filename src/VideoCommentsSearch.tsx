@@ -91,7 +91,7 @@ function VideoCommentsSearch() {
       storeToken(tokenResponse.access_token, expiresIn);
       setAccessToken(tokenResponse.access_token);
     },
-    scope: "https://www.googleapis.com/auth/youtube.readonly",
+    scope: "https://www.googleapis.com/auth/youtube.force-ssl",
   });
 
   function handleLogout(): void {
