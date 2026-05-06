@@ -32,6 +32,39 @@ const styles: Record<string, CSSProperties> = {
 };
 
 const youtubeApi = "https://www.googleapis.com/youtube/v3";
+const TOKEN_STORAGE_KEY = "yt_oauth";
+
+interface StoredToken {
+  accessToken: string;
+  expiresAt: number;
+}
+
+function getStoredToken(): string | null {
+  try {
+    const raw = sessionStorage.getItem(TOKEN_STORAGE_KEY);
+    if (!raw) return null;
+    const stored = JSON.parse(raw) as StoredToken;
+    if (Date.now() >= stored.expiresAt) {
+      sessionStorage.removeItem(TOKEN_STORAGE_KEY);
+      return null;
+    }
+    return stored.accessToken;
+  } catch {
+    return null;
+  }
+}
+
+function storeToken(token: string, expiresIn: number): void {
+  const stored: StoredToken = {
+    accessToken: token,
+    expiresAt: Date.now() + expiresIn * 1000,
+  };
+  sessionStorage.setItem(TOKEN_STORAGE_KEY, JSON.stringify(stored));
+}
+
+function clearStoredToken(): void {
+  sessionStorage.removeItem(TOKEN_STORAGE_KEY);
+}
 
 function getUrlParams() {
   const params = new URLSearchParams(window.location.search);
@@ -45,7 +78,7 @@ function VideoCommentsSearch() {
   const { videoId: initialVideoId, query: initialQuery } = getUrlParams();
   const [videoId, setVideoId] = useState(initialVideoId);
   const [query, setQuery] = useState(initialQuery);
-  const [accessToken, setAccessToken] = useState<string | null>(null);
+  const [accessToken, setAccessToken] = useState<string | null>(getStoredToken);
   const [searchResultItems, setSearchResultItems] = useState<CommentThread[]>([]);
   const [nextPageToken, setNextPageToken] = useState<string | undefined>(undefined);
   const [pageInfo, setPageInfo] = useState<PageInfo | undefined>(undefined);
@@ -53,12 +86,17 @@ function VideoCommentsSearch() {
   const [error, setError] = useState<string | null>(null);
 
   const login = useGoogleLogin({
-    onSuccess: (tokenResponse) => setAccessToken(tokenResponse.access_token),
+    onSuccess: (tokenResponse) => {
+      const expiresIn = tokenResponse.expires_in ?? 3600;
+      storeToken(tokenResponse.access_token, expiresIn);
+      setAccessToken(tokenResponse.access_token);
+    },
     scope: "https://www.googleapis.com/auth/youtube.readonly",
   });
 
   function handleLogout(): void {
     googleLogout();
+    clearStoredToken();
     setAccessToken(null);
     setSearchResultItems([]);
     setNextPageToken(undefined);
