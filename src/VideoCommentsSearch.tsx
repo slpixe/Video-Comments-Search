@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
+import { useGoogleLogin, googleLogout } from "@react-oauth/google";
 import type { CSSProperties, ChangeEvent, FormEvent } from "react";
 import "./App.css";
-import { Alert, Button, CircularProgress, InputAdornment, Stack, TextField, Typography } from "@mui/material";
+import { Alert, Button, CircularProgress, InputAdornment, Stack, TextField, Typography, Box } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import YoutubeList from "./components/youtubeList/YoutubeList";
 import Policy from "./components/TermsAndPolicy";
@@ -31,7 +32,6 @@ const styles: Record<string, CSSProperties> = {
 };
 
 const youtubeApi = "https://www.googleapis.com/youtube/v3";
-const apiKey = "AIzaSyC1gZmsaoi4eTBAOOZ--8c4qKB1ZsSobQ0";
 
 function getUrlParams() {
   const params = new URLSearchParams(window.location.search);
@@ -45,11 +45,25 @@ function VideoCommentsSearch() {
   const { videoId: initialVideoId, query: initialQuery } = getUrlParams();
   const [videoId, setVideoId] = useState(initialVideoId);
   const [query, setQuery] = useState(initialQuery);
+  const [accessToken, setAccessToken] = useState<string | null>(null);
   const [searchResultItems, setSearchResultItems] = useState<CommentThread[]>([]);
   const [nextPageToken, setNextPageToken] = useState<string | undefined>(undefined);
   const [pageInfo, setPageInfo] = useState<PageInfo | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const login = useGoogleLogin({
+    onSuccess: (tokenResponse) => setAccessToken(tokenResponse.access_token),
+    scope: "https://www.googleapis.com/auth/youtube.readonly",
+  });
+
+  function handleLogout(): void {
+    googleLogout();
+    setAccessToken(null);
+    setSearchResultItems([]);
+    setNextPageToken(undefined);
+    setPageInfo(undefined);
+  }
 
   useEffect(() => {
     const handlePopState = () => {
@@ -83,12 +97,11 @@ function VideoCommentsSearch() {
 
   function performSearch(event: FormEvent, nextPage: boolean): void {
     event.preventDefault();
-    if (!videoId) return;
+    if (!videoId || !accessToken) return;
 
     const searchObj: Record<string, string | number | null | undefined> = {
       part: "snippet",
       videoId,
-      key: apiKey,
       searchTerms: query || null,
       maxResults: 30,
       pageToken: nextPageToken && nextPage ? nextPageToken : null,
@@ -105,7 +118,9 @@ function VideoCommentsSearch() {
     setIsLoading(true);
     setError(null);
 
-    fetch(`${youtubeApi}/commentThreads?${params}`)
+    fetch(`${youtubeApi}/commentThreads?${params}`, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    })
       .then((res) => {
         if (!res.ok) {
           return res.json().then((body: { error?: { message?: string; errors?: Array<{ reason?: string }> } }) => {
@@ -139,9 +154,20 @@ function VideoCommentsSearch() {
   return (
     <div style={styles.root}>
       <div style={styles.header} className="appHeader">
-        <Typography variant="h6" component="h1" sx={{ mb: 1.5, fontWeight: 600, letterSpacing: 0.5 }}>
-          YouTube Comment Search
-        </Typography>
+        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 1.5 }}>
+          <Typography variant="h6" component="h1" sx={{ fontWeight: 600, letterSpacing: 0.5 }}>
+            YouTube Comment Search
+          </Typography>
+          {accessToken ? (
+            <Button variant="outlined" size="small" onClick={handleLogout}>
+              Logout
+            </Button>
+          ) : (
+            <Button variant="contained" size="small" onClick={() => login()}>
+              Login with Google
+            </Button>
+          )}
+        </Box>
         <form onSubmit={(e) => performSearch(e, false)}>
           <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5} alignItems="flex-start">
             <TextField
@@ -175,7 +201,7 @@ function VideoCommentsSearch() {
               variant="contained"
               color="primary"
               type="submit"
-              disabled={isLoading}
+              disabled={isLoading || !accessToken}
               sx={{ mt: "4px", height: 40, whiteSpace: "nowrap" }}
             >
               Search
@@ -202,7 +228,7 @@ function VideoCommentsSearch() {
               items={searchResultItems}
               pageInfo={pageInfo}
               search={performSearch}
-              apiKey={apiKey}
+              accessToken={accessToken ?? ""}
             />
           </div>
         )}

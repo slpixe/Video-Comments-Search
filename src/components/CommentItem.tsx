@@ -11,7 +11,7 @@ const youtubeApi = "https://www.googleapis.com/youtube/v3";
 interface Props {
   item: CommentThread;
   index: number;
-  apiKey: string;
+  accessToken: string;
 }
 
 function formatDate(iso: string): string {
@@ -22,7 +22,7 @@ function formatDate(iso: string): string {
   });
 }
 
-function CommentItem({ item, index, apiKey }: Props) {
+function CommentItem({ item, index, accessToken }: Props) {
   const [expanded, setExpanded] = useState(false);
   const [replies, setReplies] = useState<Reply[]>([]);
   const [repliesLoading, setRepliesLoading] = useState(false);
@@ -38,10 +38,11 @@ function CommentItem({ item, index, apiKey }: Props) {
     const params = new URLSearchParams({
       part: "snippet",
       parentId: topLevelComment.id,
-      key: apiKey,
       maxResults: "100",
     });
-    fetch(`${youtubeApi}/comments?${params}`)
+    fetch(`${youtubeApi}/comments?${params}`, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    })
       .then((res) => res.json() as Promise<CommentsListResponse>)
       .then((data) => {
         setReplies(data.items ?? []);
