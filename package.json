@@ -29,5 +29,10 @@
     "deploy": "npm run build && gh-pages -d dist",
     "test": "vitest run",
     "test:watch": "vitest"
+  },
+  "msw": {
+    "workerDirectory": [
+      "public"
+    ]
   }
 }
