@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { useState, useEffect } from "react";
 import "./App.css";
 import { Button, TextField } from "@mui/material";
 import YoutubeList from "./components/youtubeList/YoutubeList";
@@ -41,62 +41,55 @@ function getUrlParams() {
   };
 }
 
-class VideoCommentsSearch extends Component {
-  constructor(props) {
-    super(props);
-    const { videoId, query } = getUrlParams();
-    this.state = {
-      videoId,
-      query,
-      searchResultItems: [],
+function VideoCommentsSearch() {
+  const { videoId: initialVideoId, query: initialQuery } = getUrlParams();
+  const [videoId, setVideoId] = useState(initialVideoId);
+  const [query, setQuery] = useState(initialQuery);
+  const [searchResultItems, setSearchResultItems] = useState([]);
+  const [nextPageToken, setNextPageToken] = useState(undefined);
+  const [pageInfo, setPageInfo] = useState(undefined);
+
+  useEffect(() => {
+    const handlePopState = () => {
+      const { videoId: vid, query: q } = getUrlParams();
+      setVideoId(vid);
+      setQuery(q);
     };
-  }
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, []);
 
-  componentDidMount() {
-    window.addEventListener("popstate", this.handlePopState);
-  }
-
-  componentWillUnmount() {
-    window.removeEventListener("popstate", this.handlePopState);
-  }
-
-  handlePopState = () => {
-    const { videoId, query } = getUrlParams();
-    this.setState({ videoId, query });
-  };
-
-  updateUrlParams(videoId, query) {
+  function updateUrlParams(vid, q) {
     const params = new URLSearchParams();
-    if (videoId) params.set("video", videoId);
-    if (query) params.set("query", query);
+    if (vid) params.set("video", vid);
+    if (q) params.set("query", q);
     const search = params.toString() ? `?${params.toString()}` : "";
     window.history.pushState({}, "", `${window.location.pathname}${search}`);
   }
 
-  updateVideoId = (event) => {
-    const videoId = event.target.value;
-    this.setState({ videoId });
-    this.updateUrlParams(videoId, this.state.query);
-  };
+  function updateVideoId(event) {
+    const newVideoId = event.target.value;
+    setVideoId(newVideoId);
+    updateUrlParams(newVideoId, query);
+  }
 
-  updateSearchTerm = (event) => {
-    const query = event.target.value;
-    this.setState({ query });
-    this.updateUrlParams(this.state.videoId, query);
-  };
+  function updateSearchTerm(event) {
+    const newQuery = event.target.value;
+    setQuery(newQuery);
+    updateUrlParams(videoId, newQuery);
+  }
 
-  performSearch = (event, nextPage) => {
+  function performSearch(event, nextPage) {
     event.preventDefault();
-    if (!this.state.videoId) return;
+    if (!videoId) return;
 
     const searchObj = {
       part: "snippet",
-      videoId: this.state.videoId,
+      videoId,
       key: "AIzaSyC1gZmsaoi4eTBAOOZ--8c4qKB1ZsSobQ0",
-      searchTerms: this.state.query || null,
+      searchTerms: query || null,
       maxResults: 30,
-      pageToken:
-        this.state.nextPageToken && nextPage ? this.state.nextPageToken : null,
+      pageToken: nextPageToken && nextPage ? nextPageToken : null,
     };
 
     const params = new URLSearchParams(
@@ -106,62 +99,54 @@ class VideoCommentsSearch extends Component {
       .then((results) => results.json())
       .then((data) => {
         if (data.items) {
-          this.setState({
-            searchResultItems: [...data.items],
-            nextPageToken: data.nextPageToken,
-            pageInfo: data.pageInfo,
-          });
+          setSearchResultItems([...data.items]);
+          setNextPageToken(data.nextPageToken);
+          setPageInfo(data.pageInfo);
         }
       });
-  };
-
-  renderResults() {
-    if (!this.state.searchResultItems || this.state.searchResultItems.length === 0) {
-      return <div style={styles.noResults}>No Results found</div>;
-    }
-
-    return (
-      <div style={{ height: "100%" }}>
-        <YoutubeList
-          items={this.state.searchResultItems}
-          pageNumber={this.state.pageInfo}
-          search={this.performSearch}
-        />
-      </div>
-    );
   }
 
-  render() {
-    return (
-      <div style={styles.root}>
-        <div style={styles.header}>
-          <form onSubmit={this.performSearch}>
-            <TextField
-              type="text"
-              label="Youtube video ID"
-              helperText="e.g. kJQP7kiw5Fk"
-              value={this.state.videoId}
-              required
-              onChange={this.updateVideoId}
-              autoFocus
-            />
-            <TextField
-              type="search"
-              label="Search term"
-              helperText="e.g. song"
-              value={this.state.query}
-              onChange={this.updateSearchTerm}
-            />
-            <Button variant="outlined" color="primary" type="submit">
-              Search
-            </Button>
-          </form>
-        </div>
-        <div style={styles.searchResultsList}>{this.renderResults()}</div>
-        <Policy />
+  return (
+    <div style={styles.root}>
+      <div style={styles.header}>
+        <form onSubmit={performSearch}>
+          <TextField
+            type="text"
+            label="Youtube video ID"
+            helperText="e.g. kJQP7kiw5Fk"
+            value={videoId}
+            required
+            onChange={updateVideoId}
+            autoFocus
+          />
+          <TextField
+            type="search"
+            label="Search term"
+            helperText="e.g. song"
+            value={query}
+            onChange={updateSearchTerm}
+          />
+          <Button variant="outlined" color="primary" type="submit">
+            Search
+          </Button>
+        </form>
       </div>
-    );
-  }
+      <div style={styles.searchResultsList}>
+        {searchResultItems.length === 0 ? (
+          <div style={styles.noResults}>No Results found</div>
+        ) : (
+          <div style={{ height: "100%" }}>
+            <YoutubeList
+              items={searchResultItems}
+              pageInfo={pageInfo}
+              search={performSearch}
+            />
+          </div>
+        )}
+      </div>
+      <Policy />
+    </div>
+  );
 }
 
 export default VideoCommentsSearch;
