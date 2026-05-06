@@ -14,7 +14,6 @@ const styles: Record<string, CSSProperties> = {
   },
   header: {
     width: "100%",
-    backgroundColor: "white",
     padding: 20,
     boxSizing: "border-box",
   },
@@ -27,9 +26,6 @@ const styles: Record<string, CSSProperties> = {
   searchResultsList: {
     overflow: "auto",
     height: "100%",
-    backgroundColor: "#f5f5f5",
-    backgroundImage: "radial-gradient(#cccccc 1px, transparent 1px)",
-    backgroundSize: "20px 20px",
   },
 };
 
@@ -140,7 +136,7 @@ function VideoCommentsSearch() {
 
   return (
     <div style={styles.root}>
-      <div style={styles.header}>
+      <div style={styles.header} className="appHeader">
         <form onSubmit={(e) => performSearch(e, false)}>
           <TextField
             type="text"
@@ -163,7 +159,7 @@ function VideoCommentsSearch() {
           </Button>
         </form>
       </div>
-      <div style={styles.searchResultsList}>
+      <div style={styles.searchResultsList} className="searchResultsList">
         {isLoading ? (
           <div style={styles.noResults}>
             <CircularProgress />
