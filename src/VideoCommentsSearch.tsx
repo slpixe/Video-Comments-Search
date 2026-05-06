@@ -33,10 +33,12 @@ const styles: Record<string, CSSProperties> = {
 
 const youtubeApi = "https://www.googleapis.com/youtube/v3";
 const TOKEN_STORAGE_KEY = "yt_oauth";
+const TOKEN_SCOPE_VERSION = "v2"; // bump when OAuth scopes change
 
 interface StoredToken {
   accessToken: string;
   expiresAt: number;
+  scopeVersion: string;
 }
 
 function getStoredToken(): string | null {
@@ -44,7 +46,7 @@ function getStoredToken(): string | null {
     const raw = sessionStorage.getItem(TOKEN_STORAGE_KEY);
     if (!raw) return null;
     const stored = JSON.parse(raw) as StoredToken;
-    if (Date.now() >= stored.expiresAt) {
+    if (stored.scopeVersion !== TOKEN_SCOPE_VERSION || Date.now() >= stored.expiresAt) {
       sessionStorage.removeItem(TOKEN_STORAGE_KEY);
       return null;
     }
@@ -58,6 +60,7 @@ function storeToken(token: string, expiresIn: number): void {
   const stored: StoredToken = {
     accessToken: token,
     expiresAt: Date.now() + expiresIn * 1000,
+    scopeVersion: TOKEN_SCOPE_VERSION,
   };
   sessionStorage.setItem(TOKEN_STORAGE_KEY, JSON.stringify(stored));
 }
