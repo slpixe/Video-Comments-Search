@@ -1,11 +1,7 @@
 import React, { Component } from "react";
 import "./App.css";
-import { withStyles } from "@material-ui/styles";
-import { Button, TextField, FormControl } from "@material-ui/core";
-import queryString from "qs";
+import { Button, TextField } from "@mui/material";
 import YoutubeList from "./components/youtubeList/YoutubeList";
-import { addUrlProps, UrlQueryParamTypes } from "react-url-query";
-import history from "./history";
 import Policy from "./components/TermsAndPolicy";
 
 const styles = {
@@ -24,9 +20,8 @@ const styles = {
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    height: "100%"
+    height: "100%",
   },
-  searchButton: {},
   searchResultsList: {
     overflow: "auto",
     height: "100%",
@@ -37,82 +32,91 @@ const styles = {
 
 const youtubeApi = "https://www.googleapis.com/youtube/v3";
 
-const urlPropsQueryConfig = {
-  videoId: { type: UrlQueryParamTypes.string, queryParam: "video" },
-  query: { type: UrlQueryParamTypes.string, queryParam: "query" },
-};
+function getUrlParams() {
+  const params = new URLSearchParams(window.location.search);
+  return {
+    videoId: params.get("video") || "",
+    query: params.get("query") || "",
+  };
+}
 
-class App extends Component {
+class VideoCommentsSearch extends Component {
   constructor(props) {
     super(props);
-
+    const { videoId, query } = getUrlParams();
     this.state = {
-      searchResultItems: []
+      videoId,
+      query,
+      searchResultItems: [],
     };
   }
 
   componentDidMount() {
-    history.listen(() => this.forceUpdate());
+    window.addEventListener("popstate", this.handlePopState);
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener("popstate", this.handlePopState);
+  }
+
+  handlePopState = () => {
+    const { videoId, query } = getUrlParams();
+    this.setState({ videoId, query });
+  };
+
+  updateUrlParams(videoId, query) {
+    const params = new URLSearchParams();
+    if (videoId) params.set("video", videoId);
+    if (query) params.set("query", query);
+    const search = params.toString() ? `?${params.toString()}` : "";
+    window.history.pushState({}, "", `${window.location.pathname}${search}`);
   }
 
   updateVideoId = (event) => {
     const videoId = event.target.value;
-    this.props.onChangeVideoId(videoId);
+    this.setState({ videoId });
+    this.updateUrlParams(videoId, this.state.query);
   };
 
   updateSearchTerm = (event) => {
-    const queryString = event.target.value;
-    this.props.onChangeQuery(queryString);
+    const query = event.target.value;
+    this.setState({ query });
+    this.updateUrlParams(this.state.videoId, query);
   };
 
   performSearch = (event, nextPage) => {
     event.preventDefault();
-    if (!this.props.videoId) return false;
+    if (!this.state.videoId) return;
 
-    let searchObj = {
+    const searchObj = {
       part: "snippet",
-      videoId: this.props.videoId,
+      videoId: this.state.videoId,
       key: "AIzaSyC1gZmsaoi4eTBAOOZ--8c4qKB1ZsSobQ0",
-      searchTerms: this.props.query ? this.props.query : null,
+      searchTerms: this.state.query || null,
       maxResults: 30,
       pageToken:
         this.state.nextPageToken && nextPage ? this.state.nextPageToken : null,
     };
 
-    fetch(`${youtubeApi}/commentThreads?${queryString.stringify(searchObj)}`)
-      .then((results) => {
-        return results.json();
-      })
+    const params = new URLSearchParams(
+      Object.fromEntries(Object.entries(searchObj).filter(([, v]) => v != null))
+    );
+    fetch(`${youtubeApi}/commentThreads?${params}`)
+      .then((results) => results.json())
       .then((data) => {
-
-        console.log('=data.items', data.items);
-
-        // if(!data.items) {
-        //   this.setState({
-        //     noResults: true
-        //   });
-        // }
-
-        if(data.items) {
+        if (data.items) {
           this.setState({
             searchResultItems: [...data.items],
             nextPageToken: data.nextPageToken,
-            pageInfo: data.pageInfo
+            pageInfo: data.pageInfo,
           });
         }
       });
   };
 
   renderResults() {
-    if (
-      !this.state.searchResultItems ||
-      this.state.searchResultItems.length === 0
-    ) {
-      return (
-        <div className={this.props.classes.noResults}>
-          No Results found
-        </div>
-      )
+    if (!this.state.searchResultItems || this.state.searchResultItems.length === 0) {
+      return <div style={styles.noResults}>No Results found</div>;
     }
 
     return (
@@ -128,47 +132,36 @@ class App extends Component {
 
   render() {
     return (
-      <div className={this.props.classes.root}>
-        <div className={this.props.classes.header}>
+      <div style={styles.root}>
+        <div style={styles.header}>
           <form onSubmit={this.performSearch}>
             <TextField
-              className={this.props.classes.searchBox}
-              type={"text"}
-              label={"Youtube video ID"}
-              helperText={"e.g. kJQP7kiw5Fk"}
-              value={this.props.videoId}
-              required={true}
-              onChange={(event) => this.updateVideoId(event)}
+              type="text"
+              label="Youtube video ID"
+              helperText="e.g. kJQP7kiw5Fk"
+              value={this.state.videoId}
+              required
+              onChange={this.updateVideoId}
               autoFocus
             />
             <TextField
-              className={this.props.classes.searchBox}
-              type={"search"}
-              label={"Search term"}
-              helperText={"e.g. song"}
-              value={this.props.query || ""}
-              required={false}
-              onChange={(event) => this.updateSearchTerm(event)}
+              type="search"
+              label="Search term"
+              helperText="e.g. song"
+              value={this.state.query}
+              onChange={this.updateSearchTerm}
             />
-            <Button
-              className={this.props.classes.searchButton}
-              variant="outlined"
-              color="primary"
-              // onClick={this.performSearch}
-              type="submit"
-            >
+            <Button variant="outlined" color="primary" type="submit">
               Search
             </Button>
           </form>
         </div>
-        <div className={this.props.classes.searchResultsList}>
-          {this.renderResults()}
-        </div>
+        <div style={styles.searchResultsList}>{this.renderResults()}</div>
         <Policy />
       </div>
     );
   }
 }
 
-// export default App;
-export default addUrlProps({ urlPropsQueryConfig })(withStyles(styles)(App));
+export default VideoCommentsSearch;
+
