@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
+import type { CSSProperties, ChangeEvent, FormEvent } from "react";
 import "./App.css";
 import { Alert, Button, CircularProgress, TextField } from "@mui/material";
 import YoutubeList from "./components/youtubeList/YoutubeList";
 import Policy from "./components/TermsAndPolicy";
+import type { CommentThread, CommentThreadsResponse, PageInfo } from "./types/youtube";
 
-const styles = {
+const styles: Record<string, CSSProperties> = {
   root: {
     height: "100%",
     display: "flex",
@@ -45,11 +47,11 @@ function VideoCommentsSearch() {
   const { videoId: initialVideoId, query: initialQuery } = getUrlParams();
   const [videoId, setVideoId] = useState(initialVideoId);
   const [query, setQuery] = useState(initialQuery);
-  const [searchResultItems, setSearchResultItems] = useState([]);
-  const [nextPageToken, setNextPageToken] = useState(undefined);
-  const [pageInfo, setPageInfo] = useState(undefined);
+  const [searchResultItems, setSearchResultItems] = useState<CommentThread[]>([]);
+  const [nextPageToken, setNextPageToken] = useState<string | undefined>(undefined);
+  const [pageInfo, setPageInfo] = useState<PageInfo | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const handlePopState = () => {
@@ -61,7 +63,7 @@ function VideoCommentsSearch() {
     return () => window.removeEventListener("popstate", handlePopState);
   }, []);
 
-  function updateUrlParams(vid, q) {
+  function updateUrlParams(vid: string, q: string): void {
     const params = new URLSearchParams();
     if (vid) params.set("video", vid);
     if (q) params.set("query", q);
@@ -69,23 +71,23 @@ function VideoCommentsSearch() {
     window.history.pushState({}, "", `${window.location.pathname}${search}`);
   }
 
-  function updateVideoId(event) {
+  function updateVideoId(event: ChangeEvent<HTMLInputElement>): void {
     const newVideoId = event.target.value;
     setVideoId(newVideoId);
     updateUrlParams(newVideoId, query);
   }
 
-  function updateSearchTerm(event) {
+  function updateSearchTerm(event: ChangeEvent<HTMLInputElement>): void {
     const newQuery = event.target.value;
     setQuery(newQuery);
     updateUrlParams(videoId, newQuery);
   }
 
-  function performSearch(event, nextPage) {
+  function performSearch(event: FormEvent, nextPage: boolean): void {
     event.preventDefault();
     if (!videoId) return;
 
-    const searchObj = {
+    const searchObj: Record<string, string | number | null | undefined> = {
       part: "snippet",
       videoId,
       key: "AIzaSyC1gZmsaoi4eTBAOOZ--8c4qKB1ZsSobQ0",
@@ -95,7 +97,11 @@ function VideoCommentsSearch() {
     };
 
     const params = new URLSearchParams(
-      Object.fromEntries(Object.entries(searchObj).filter(([, v]) => v != null))
+      Object.fromEntries(
+        Object.entries(searchObj)
+          .filter((entry): entry is [string, string | number] => entry[1] != null)
+          .map(([k, v]) => [k, String(v)])
+      )
     );
 
     setIsLoading(true);
@@ -104,28 +110,28 @@ function VideoCommentsSearch() {
     fetch(`${youtubeApi}/commentThreads?${params}`)
       .then((res) => {
         if (!res.ok) {
-          return res.json().then((body) => {
+          return res.json().then((body: { error?: { message?: string; errors?: Array<{ reason?: string }> } }) => {
             const reason = body?.error?.errors?.[0]?.reason;
-            const knownMessages = {
+            const knownMessages: Record<string, string> = {
               quotaExceeded: "YouTube API quota exceeded. Please try again later.",
               forbidden: "Access to this video's comments is forbidden.",
             };
             throw new Error(
-              knownMessages[reason] ??
+              (reason !== undefined ? knownMessages[reason] : undefined) ??
                 body?.error?.message ??
                 `API error ${res.status}`
             );
           });
         }
-        return res.json();
+        return res.json() as Promise<CommentThreadsResponse>;
       })
       .then((data) => {
         setSearchResultItems(data.items ?? []);
         setNextPageToken(data.nextPageToken);
         setPageInfo(data.pageInfo);
       })
-      .catch((err) => {
-        setError(err.message ?? "Something went wrong. Please try again.");
+      .catch((err: unknown) => {
+        setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
       })
       .finally(() => {
         setIsLoading(false);
@@ -135,7 +141,7 @@ function VideoCommentsSearch() {
   return (
     <div style={styles.root}>
       <div style={styles.header}>
-        <form onSubmit={performSearch}>
+        <form onSubmit={(e) => performSearch(e, false)}>
           <TextField
             type="text"
             label="Youtube video ID"

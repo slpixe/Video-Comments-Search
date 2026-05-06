@@ -1,5 +1,3 @@
-import React from 'react';
-
 const Policy = () => (
   <div>
     <h1>Terms of Service</h1>

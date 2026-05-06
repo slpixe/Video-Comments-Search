@@ -1,4 +1,3 @@
-import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
@@ -78,12 +77,12 @@ describe("VideoCommentsSearch", () => {
   });
 
   it("disables the search button while loading", async () => {
-    let resolveRequest;
+    let resolveRequest!: (value: Response) => void;
     server.use(
       http.get(
         "https://www.googleapis.com/youtube/v3/commentThreads",
         () =>
-          new Promise((resolve) => {
+          new Promise<Response>((resolve) => {
             resolveRequest = resolve;
           })
       )

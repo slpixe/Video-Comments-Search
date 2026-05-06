@@ -1,4 +1,6 @@
-export const commentThreadsFixture = {
+import type { CommentThreadsResponse } from '../../types/youtube';
+
+export const commentThreadsFixture: CommentThreadsResponse = {
   kind: "youtube#commentThreadListResponse",
   pageInfo: {
     totalResults: 3,
@@ -11,6 +13,7 @@ export const commentThreadsFixture = {
       id: "comment1",
       snippet: {
         topLevelComment: {
+          id: "comment1_tl",
           snippet: {
             textOriginal: "This is the first comment",
             authorDisplayName: "User One",
@@ -25,6 +28,7 @@ export const commentThreadsFixture = {
       id: "comment2",
       snippet: {
         topLevelComment: {
+          id: "comment2_tl",
           snippet: {
             textOriginal: "Another great video!",
             authorDisplayName: "User Two",
@@ -39,6 +43,7 @@ export const commentThreadsFixture = {
       id: "comment3",
       snippet: {
         topLevelComment: {
+          id: "comment3_tl",
           snippet: {
             textOriginal: "Keep up the good work",
             authorDisplayName: "User Three",
