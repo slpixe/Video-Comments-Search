@@ -25,8 +25,9 @@ const styles = {
   searchResultsList: {
     overflow: "auto",
     height: "100%",
-    background:
-      "url(http://cdn.backgroundhost.com/backgrounds/subtlepatterns/hexellence.png)",
+    backgroundColor: "#f5f5f5",
+    backgroundImage: "radial-gradient(#cccccc 1px, transparent 1px)",
+    backgroundSize: "20px 20px",
   },
 };
 
