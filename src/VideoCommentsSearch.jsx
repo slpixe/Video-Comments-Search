@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "./App.css";
-import { Button, TextField } from "@mui/material";
+import { Alert, Button, CircularProgress, TextField } from "@mui/material";
 import YoutubeList from "./components/youtubeList/YoutubeList";
 import Policy from "./components/TermsAndPolicy";
 
@@ -48,6 +48,8 @@ function VideoCommentsSearch() {
   const [searchResultItems, setSearchResultItems] = useState([]);
   const [nextPageToken, setNextPageToken] = useState(undefined);
   const [pageInfo, setPageInfo] = useState(undefined);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const handlePopState = () => {
@@ -95,14 +97,38 @@ function VideoCommentsSearch() {
     const params = new URLSearchParams(
       Object.fromEntries(Object.entries(searchObj).filter(([, v]) => v != null))
     );
+
+    setIsLoading(true);
+    setError(null);
+
     fetch(`${youtubeApi}/commentThreads?${params}`)
-      .then((results) => results.json())
-      .then((data) => {
-        if (data.items) {
-          setSearchResultItems([...data.items]);
-          setNextPageToken(data.nextPageToken);
-          setPageInfo(data.pageInfo);
+      .then((res) => {
+        if (!res.ok) {
+          return res.json().then((body) => {
+            const reason = body?.error?.errors?.[0]?.reason;
+            const knownMessages = {
+              quotaExceeded: "YouTube API quota exceeded. Please try again later.",
+              forbidden: "Access to this video's comments is forbidden.",
+            };
+            throw new Error(
+              knownMessages[reason] ??
+                body?.error?.message ??
+                `API error ${res.status}`
+            );
+          });
         }
+        return res.json();
+      })
+      .then((data) => {
+        setSearchResultItems(data.items ?? []);
+        setNextPageToken(data.nextPageToken);
+        setPageInfo(data.pageInfo);
+      })
+      .catch((err) => {
+        setError(err.message ?? "Something went wrong. Please try again.");
+      })
+      .finally(() => {
+        setIsLoading(false);
       });
   }
 
@@ -126,13 +152,21 @@ function VideoCommentsSearch() {
             value={query}
             onChange={updateSearchTerm}
           />
-          <Button variant="outlined" color="primary" type="submit">
+          <Button variant="outlined" color="primary" type="submit" disabled={isLoading}>
             Search
           </Button>
         </form>
       </div>
       <div style={styles.searchResultsList}>
-        {searchResultItems.length === 0 ? (
+        {isLoading ? (
+          <div style={styles.noResults}>
+            <CircularProgress />
+          </div>
+        ) : error ? (
+          <div style={{ padding: 16 }}>
+            <Alert severity="error">{error}</Alert>
+          </div>
+        ) : searchResultItems.length === 0 ? (
           <div style={styles.noResults}>No Results found</div>
         ) : (
           <div style={{ height: "100%" }}>
