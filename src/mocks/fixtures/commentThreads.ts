@@ -12,6 +12,7 @@ export const commentThreadsFixture: CommentThreadsResponse = {
       kind: "youtube#commentThread",
       id: "comment1",
       snippet: {
+        totalReplyCount: 2,
         topLevelComment: {
           id: "comment1_tl",
           snippet: {
@@ -22,11 +23,34 @@ export const commentThreadsFixture: CommentThreadsResponse = {
           },
         },
       },
+      replies: {
+        comments: [
+          {
+            id: "comment1_r1",
+            snippet: {
+              textOriginal: "Great point!",
+              authorDisplayName: "User Four",
+              likeCount: 1,
+              publishedAt: "2024-01-01T12:00:00.000Z",
+            },
+          },
+          {
+            id: "comment1_r2",
+            snippet: {
+              textOriginal: "I agree with this!",
+              authorDisplayName: "User Five",
+              likeCount: 0,
+              publishedAt: "2024-01-01T18:00:00.000Z",
+            },
+          },
+        ],
+      },
     },
     {
       kind: "youtube#commentThread",
       id: "comment2",
       snippet: {
+        totalReplyCount: 0,
         topLevelComment: {
           id: "comment2_tl",
           snippet: {
@@ -42,6 +66,7 @@ export const commentThreadsFixture: CommentThreadsResponse = {
       kind: "youtube#commentThread",
       id: "comment3",
       snippet: {
+        totalReplyCount: 1,
         topLevelComment: {
           id: "comment3_tl",
           snippet: {
@@ -51,6 +76,19 @@ export const commentThreadsFixture: CommentThreadsResponse = {
             publishedAt: "2024-01-03T00:00:00.000Z",
           },
         },
+      },
+      replies: {
+        comments: [
+          {
+            id: "comment3_r1",
+            snippet: {
+              textOriginal: "Thanks for the kind words!",
+              authorDisplayName: "Channel Owner",
+              likeCount: 3,
+              publishedAt: "2024-01-03T09:00:00.000Z",
+            },
+          },
+        ],
       },
     },
   ],

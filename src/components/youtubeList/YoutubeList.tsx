@@ -1,5 +1,6 @@
 import type { FormEvent } from "react";
 import type { CommentThread, PageInfo } from "../../types/youtube";
+import CommentItem from "../CommentItem";
 
 interface Props {
   items: CommentThread[];
@@ -10,10 +11,8 @@ interface Props {
 function YoutubeList({ items }: Props) {
   return (
     <div style={{ height: '100%' }}>
-      {items.map(item => (
-        <div key={item.id} className={'searchItem'}>
-          {item.snippet.topLevelComment.snippet.textOriginal}
-        </div>
+      {items.map((item, index) => (
+        <CommentItem key={item.id} item={item} index={index} />
       ))}
     </div>
   );

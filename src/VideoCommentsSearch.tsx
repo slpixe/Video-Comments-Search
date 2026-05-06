@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import type { CSSProperties, ChangeEvent, FormEvent } from "react";
 import "./App.css";
-import { Alert, Button, CircularProgress, TextField } from "@mui/material";
+import { Alert, Button, CircularProgress, InputAdornment, Stack, TextField, Typography } from "@mui/material";
+import SearchIcon from "@mui/icons-material/Search";
 import YoutubeList from "./components/youtubeList/YoutubeList";
 import Policy from "./components/TermsAndPolicy";
 import type { CommentThread, CommentThreadsResponse, PageInfo } from "./types/youtube";
@@ -137,26 +138,48 @@ function VideoCommentsSearch() {
   return (
     <div style={styles.root}>
       <div style={styles.header} className="appHeader">
+        <Typography variant="h6" component="h1" sx={{ mb: 1.5, fontWeight: 600, letterSpacing: 0.5 }}>
+          YouTube Comment Search
+        </Typography>
         <form onSubmit={(e) => performSearch(e, false)}>
-          <TextField
-            type="text"
-            label="Youtube video ID"
-            helperText="e.g. kJQP7kiw5Fk"
-            value={videoId}
-            required
-            onChange={updateVideoId}
-            autoFocus
-          />
-          <TextField
-            type="search"
-            label="Search term"
-            helperText="e.g. song"
-            value={query}
-            onChange={updateSearchTerm}
-          />
-          <Button variant="outlined" color="primary" type="submit" disabled={isLoading}>
-            Search
-          </Button>
+          <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5} alignItems="flex-start">
+            <TextField
+              type="text"
+              label="Video ID"
+              helperText="e.g. kJQP7kiw5Fk"
+              value={videoId}
+              required
+              onChange={updateVideoId}
+              autoFocus
+              size="small"
+              sx={{ minWidth: 180 }}
+            />
+            <TextField
+              type="search"
+              label="Search term"
+              helperText="e.g. song"
+              value={query}
+              onChange={updateSearchTerm}
+              size="small"
+              sx={{ minWidth: 200, flexGrow: 1 }}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon fontSize="small" />
+                  </InputAdornment>
+                ),
+              }}
+            />
+            <Button
+              variant="contained"
+              color="primary"
+              type="submit"
+              disabled={isLoading}
+              sx={{ mt: "4px", height: 40, whiteSpace: "nowrap" }}
+            >
+              Search
+            </Button>
+          </Stack>
         </form>
       </div>
       <div style={styles.searchResultsList} className="searchResultsList">
@@ -169,7 +192,9 @@ function VideoCommentsSearch() {
             <Alert severity="error">{error}</Alert>
           </div>
         ) : searchResultItems.length === 0 ? (
-          <div style={styles.noResults}>No Results found</div>
+          <div style={styles.noResults}>
+            <Typography color="text.secondary">No results found</Typography>
+          </div>
         ) : (
           <div style={{ height: "100%" }}>
             <YoutubeList

@@ -10,11 +10,20 @@ export interface TopLevelComment {
   snippet: CommentSnippet;
 }
 
+export interface Reply {
+  id: string;
+  snippet: CommentSnippet;
+}
+
 export interface CommentThread {
   kind: 'youtube#commentThread';
   id: string;
   snippet: {
     topLevelComment: TopLevelComment;
+    totalReplyCount: number;
+  };
+  replies?: {
+    comments: Reply[];
   };
 }
 
