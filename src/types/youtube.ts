@@ -38,3 +38,10 @@ export interface CommentThreadsResponse {
   nextPageToken?: string;
   pageInfo: PageInfo;
 }
+
+export interface CommentsListResponse {
+  kind: string;
+  items: Reply[];
+  nextPageToken?: string;
+  pageInfo: PageInfo;
+}

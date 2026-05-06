@@ -31,6 +31,7 @@ const styles: Record<string, CSSProperties> = {
 };
 
 const youtubeApi = "https://www.googleapis.com/youtube/v3";
+const apiKey = "AIzaSyC1gZmsaoi4eTBAOOZ--8c4qKB1ZsSobQ0";
 
 function getUrlParams() {
   const params = new URLSearchParams(window.location.search);
@@ -87,7 +88,7 @@ function VideoCommentsSearch() {
     const searchObj: Record<string, string | number | null | undefined> = {
       part: "snippet",
       videoId,
-      key: "AIzaSyC1gZmsaoi4eTBAOOZ--8c4qKB1ZsSobQ0",
+      key: apiKey,
       searchTerms: query || null,
       maxResults: 30,
       pageToken: nextPageToken && nextPage ? nextPageToken : null,
@@ -201,6 +202,7 @@ function VideoCommentsSearch() {
               items={searchResultItems}
               pageInfo={pageInfo}
               search={performSearch}
+              apiKey={apiKey}
             />
           </div>
         )}
