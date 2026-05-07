@@ -33,7 +33,7 @@ const styles: Record<string, CSSProperties> = {
 
 const youtubeApi = "https://www.googleapis.com/youtube/v3";
 const TOKEN_STORAGE_KEY = "yt_oauth";
-const TOKEN_SCOPE_VERSION = "v2"; // bump when OAuth scopes change
+const TOKEN_SCOPE_VERSION = "v3"; // bump when OAuth scopes change
 
 interface StoredToken {
   accessToken: string;
@@ -94,7 +94,7 @@ function VideoCommentsSearch() {
       storeToken(tokenResponse.access_token, expiresIn);
       setAccessToken(tokenResponse.access_token);
     },
-    scope: "https://www.googleapis.com/auth/youtube.force-ssl",
+    scope: "https://www.googleapis.com/auth/youtube.readonly",
   });
 
   function handleLogout(): void {
