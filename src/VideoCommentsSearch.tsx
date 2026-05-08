@@ -199,13 +199,9 @@ function VideoCommentsSearch() {
           <Typography variant="h6" component="h1" sx={{ fontWeight: 600, letterSpacing: 0.5 }}>
             YouTube Comment Search
           </Typography>
-          {accessToken ? (
+          {accessToken && (
             <Button variant="outlined" size="small" onClick={handleLogout}>
               Logout
-            </Button>
-          ) : (
-            <Button variant="contained" size="small" onClick={() => login()}>
-              Login with Google
             </Button>
           )}
         </Box>
@@ -251,7 +247,16 @@ function VideoCommentsSearch() {
         </form>
       </div>
       <div style={styles.searchResultsList} className="searchResultsList">
-        {isLoading ? (
+        {!accessToken ? (
+          <div style={styles.noResults}>
+            <Stack alignItems="center" spacing={1.5}>
+              <Typography color="text.secondary">Please log in with Google to search comments.</Typography>
+              <Button variant="contained" size="small" onClick={() => login()}>
+                Login with Google
+              </Button>
+            </Stack>
+          </div>
+        ) : isLoading ? (
           <div style={styles.noResults}>
             <CircularProgress />
           </div>
