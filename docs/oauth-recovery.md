@@ -52,8 +52,9 @@ to keep an unused client.
   All CI checks passed: 40 unit tests, 10 desktop/mobile E2E tests and 9 Storybook checks.
 - The CNAME was reviewed (1 addition, no changes/deletions), merged and applied through
   [domains MR #31](https://gitlab.com/slpixe/domains/-/merge_requests/31).
-- GitHub Pages has claimed the hostname. HTTPS certificate issuance is pending;
-  public authoritative DNS resolves correctly, while some caches still have the earlier negative answer.
+- GitHub Pages has issued the hostname’s certificate, and **Enforce HTTPS** is enabled.
+  The HTTPS homepage, production JavaScript, privacy policy and terms page all
+  return successfully with valid TLS. Some local DNS caches still have the earlier negative answer.
 - The existing web OAuth client is enabled; last use shown is 8 May 2026.
   It has the new HTTPS JavaScript origin as well as the existing local/GitHub origins.
 - Consent branding now matches the homepage name, **YouTube Comment Search**.
@@ -66,9 +67,10 @@ to keep an unused client.
 - Google Search Console confirmed ownership of `slpixe.com` after the TXT record
   was reviewed, merged and applied through
   [domains MR #32](https://gitlab.com/slpixe/domains/-/merge_requests/32). Keep this TXT record to retain verification.
-- A real OAuth login and search still need verification after HTTPS is ready.
+- A real OAuth login and search still need verification once the local DNS cache expires.
   Google requires an unlisted YouTube demo showing consent and scope use.
-  No complete verification submission has been made yet.
+  No complete verification submission has been made yet. The Verification centre
+  requires branding to be verified and published before enabling sensitive-scope submission.
 
 ## Demo required for scope verification
 
@@ -117,8 +119,11 @@ until Google confirms it.
    allow the account used for the live check.
 7. Update `VITE_GOOGLE_CLIENT_ID` only if a replacement web client was needed;
    rebuild after changing it. Complete a real login and YouTube search from
-   the custom domain, retain each needed client, then resubmit verification
-   through Cloud Console with any demonstration/material Google requests.
+   the custom domain and retain each needed client. After the domain ownership
+   propagation period, request branding reverification using **View issues →
+   I have fixed the issues → Proceed**. Google must verify and publish branding
+   before **Prepare for verification** is enabled for data access. Then provide
+   the real demo URL and submit the sensitive-scope review. Approval is Google’s decision.
 
 A repository change cannot remove Google's verification warning or approval
 requirements. If login fails, record the exact Google error without tokens;
