@@ -2,8 +2,8 @@
 
 Investigation date: 8 October 2026. Project: `video-comments-search`
 (project number `761185990136`). Findings below came from the owner's Gmail
-using the read-only gog connector; no email was sent and no Cloud settings
-were changed.
+using the read-only gog connector and the Google Cloud Console. No email was sent.
+Deployment and OAuth configuration were updated with the owner’s authorization.
 
 ## What Google's emails establish
 
@@ -23,14 +23,14 @@ were changed.
   [Original email](https://mail.google.com/mail/u/0/#all/1a1182a7af4c9426)
 
 Verification rejection is not evidence that every Google login now fails.
-The live client state, audience/test users, authorized origins and exact Google
-error still need checking in Cloud Console and a real-browser login. The app's
+The client, production audience and authorized origins have now been checked in
+Cloud Console. A real-browser login still needs checking after HTTPS is ready. The app's
 local tests simulate auth and cannot establish those external facts.
 
 Google's [OAuth policies](https://developers.google.com/identity/protocols/oauth2/policies)
 allow deletion of clients inactive for at least six months. Retain each needed
-client by using its actual sign-in or token flow, as the email requests, well
-before the warning period ends (around 6 November 2026). If already deleted,
+client by using its actual sign-in or token flow, as the email requests, before **3 November 2026**, the specific deadline shown for the current web client
+in Cloud Console. If already deleted,
 check whether it can still be restored in the Console; the email states a
 30-day restoration window. Never create dummy traffic or broaden scopes just
 to keep an unused client.
@@ -45,8 +45,43 @@ to keep an unused client.
   `video-comment-search.slpixe.com` to `slpixe.github.io`, following
   [GitHub's subdomain configuration](https://docs.github.com/en/pages/configuring-a-custom-domain-for-your-github-pages-site/managing-a-custom-domain-for-your-github-pages-site).
 
-These are local changes. DNS has not been applied, the app has not been
-published, and Google verification has not been resubmitted.
+## Rollout status (8 October 2026)
+
+- App changes were merged and deployed successfully through
+  [GitHub PR #35](https://github.com/slpixe/Video-Comments-Search/pull/35).
+  All CI checks passed: 40 unit tests, 10 desktop/mobile E2E tests and 9 Storybook checks.
+- The CNAME was reviewed (1 addition, no changes/deletions), merged and applied through
+  [domains MR #31](https://gitlab.com/slpixe/domains/-/merge_requests/31).
+- GitHub Pages has claimed the hostname. HTTPS certificate issuance is pending;
+  public authoritative DNS resolves correctly, while some caches still have the earlier negative answer.
+- The existing web OAuth client is enabled; last use shown is 8 May 2026.
+  It has the new HTTPS JavaScript origin as well as the existing local/GitHub origins.
+- Consent branding now matches the homepage name, **YouTube Comment Search**.
+  Homepage, privacy and terms URLs point to the new hostname, and `slpixe.com`
+  is an authorized domain.
+- Audience is already **External / In production**, with 2 of the 100 unverified users used.
+- YouTube Data API v3 is enabled. The app already requests `youtube.readonly`,
+  but this sensitive scope was missing from the Console's review configuration.
+  It has now been declared, with a truthful usage justification.
+- Google Search Console confirmed ownership of `slpixe.com` after the TXT record
+  was reviewed, merged and applied through
+  [domains MR #32](https://gitlab.com/slpixe/domains/-/merge_requests/32). Keep this TXT record to retain verification.
+- A real OAuth login and search still need verification after HTTPS is ready.
+  Google requires an unlisted YouTube demo showing consent and scope use.
+  No complete verification submission has been made yet.
+
+## Demo required for scope verification
+
+Record the real production app (without mock mode), showing the address bar,
+Google login/account selection and the full consent flow for this project's
+web client, then a submitted video search, filtering comments and viewing replies.
+Show the unverified-app screen if Google presents it. Do not expose access tokens
+or client secrets. Upload to YouTube as unlisted and paste that URL into the
+Data access demo field. Google makes the final approval decision.
+
+The Console asks that domain ownership changes be given 24 hours before retrying
+branding verification. Do not claim ownership or scope verification is approved
+until Google confirms it.
 
 ## Rollout order
 
