@@ -1,12 +1,15 @@
-import { useState } from "react";
-import { Collapse, CircularProgress, Tooltip } from "@mui/material";
-import ThumbUpOutlinedIcon from "@mui/icons-material/ThumbUpOutlined";
-import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import ExpandLessIcon from "@mui/icons-material/ExpandLess";
-import type { CommentThread, Reply, CommentsListResponse } from "../types/youtube";
+import { useState, useEffect, useRef } from "react";
+import { Alert, Button, Collapse, CircularProgress, Tooltip } from "@mui/material";
+import {
+  ThumbUpOutlined as ThumbUpOutlinedIcon,
+  ChatBubbleOutline as ChatBubbleOutlineIcon,
+  ExpandMore as ExpandMoreIcon,
+  ExpandLess as ExpandLessIcon,
+} from '@mui/icons-material';
+import type { CommentThread, Reply } from "../types/youtube";
 
-const youtubeApi = "https://www.googleapis.com/youtube/v3";
+import { listReplies, YouTubeApiError } from '../api/youtube';
+import { useAuth } from '../auth/AuthProvider';
 
 interface Props {
   item: CommentThread;
@@ -27,36 +30,41 @@ function CommentItem({ item, index, accessToken }: Props) {
   const [replies, setReplies] = useState<Reply[]>([]);
   const [repliesLoading, setRepliesLoading] = useState(false);
   const [repliesFetched, setRepliesFetched] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [nextPageToken, setNextPageToken] = useState<string>();
+  const request = useRef<AbortController | null>(null);
+  const { expire } = useAuth();
+  useEffect(() => () => request.current?.abort(), []);
   const { topLevelComment, totalReplyCount } = item.snippet;
   const { textOriginal, authorDisplayName, likeCount, publishedAt } =
     topLevelComment.snippet;
   const hasReplies = totalReplyCount > 0;
 
-  function fetchReplies(): void {
-    if (repliesFetched) return;
+  async function fetchReplies(nextPage = false): Promise<void> {
+    if (repliesLoading || (repliesFetched && !nextPage && !error)) return;
+    const controller = new AbortController();
+    request.current = controller;
     setRepliesLoading(true);
-    const params = new URLSearchParams({
-      part: "snippet",
-      parentId: topLevelComment.id,
-      maxResults: "100",
-    });
-    fetch(`${youtubeApi}/comments?${params}`, {
-      headers: { Authorization: `Bearer ${accessToken}` },
-    })
-      .then((res) => res.json() as Promise<CommentsListResponse>)
-      .then((data) => {
-        setReplies(data.items ?? []);
-        setRepliesFetched(true);
-      })
-      .finally(() => {
-        setRepliesLoading(false);
-      });
+    setError(null);
+    try {
+      const data = await listReplies(topLevelComment.id, accessToken, nextPage ? nextPageToken : undefined, controller.signal);
+      if (controller.signal.aborted) return;
+      setReplies(previous => nextPage ? [...previous, ...(data.items ?? [])] : data.items ?? []);
+      setNextPageToken(data.nextPageToken);
+      setRepliesFetched(true);
+    } catch (failure) {
+      if (controller.signal.aborted) return;
+      if (failure instanceof YouTubeApiError && failure.status === 401) expire();
+      else setError(failure instanceof Error ? failure.message : 'Unable to load replies.');
+    } finally {
+      if (!controller.signal.aborted) setRepliesLoading(false);
+    }
   }
 
   function toggleExpanded(): void {
     const next = !expanded;
     setExpanded(next);
-    if (next) fetchReplies();
+    if (next) void fetchReplies(Boolean(error && nextPageToken));
   }
 
   return (
@@ -73,13 +81,12 @@ function CommentItem({ item, index, accessToken }: Props) {
           )}
           {hasReplies && (
             <Tooltip title={expanded ? "Hide replies" : `${totalReplyCount} repl${totalReplyCount === 1 ? "y" : "ies"}`}>
-              <span
+              <button
+                type="button"
                 className="commentItem__stat commentItem__replyToggle"
                 onClick={toggleExpanded}
-                role="button"
                 aria-label={expanded ? "Hide replies" : "Show replies"}
-                tabIndex={0}
-                onKeyDown={(e) => e.key === "Enter" || e.key === " " ? toggleExpanded() : undefined}
+                aria-expanded={expanded}
               >
                 <ChatBubbleOutlineIcon fontSize="inherit" />
                 <span className="commentItem__replyCount">{totalReplyCount}</span>
@@ -88,7 +95,7 @@ function CommentItem({ item, index, accessToken }: Props) {
                 ) : (
                   <ExpandMoreIcon fontSize="inherit" />
                 )}
-              </span>
+              </button>
             </Tooltip>
           )}
           <span className="commentItem__date">{formatDate(publishedAt)}</span>
@@ -98,9 +105,10 @@ function CommentItem({ item, index, accessToken }: Props) {
       {hasReplies && (
         <Collapse in={expanded}>
           <div className="commentItem__replies">
+            {error && <Alert severity="error">{error}<Button onClick={() => void fetchReplies(Boolean(nextPageToken))}>Retry replies</Button></Alert>}
             {repliesLoading ? (
               <div style={{ display: "flex", justifyContent: "center", padding: 8 }}>
-                <CircularProgress size={20} />
+                <CircularProgress size={20} aria-label="Loading replies" />
               </div>
             ) : (
               replies.map((reply) => (
@@ -121,6 +129,7 @@ function CommentItem({ item, index, accessToken }: Props) {
                 </div>
               ))
             )}
+            {nextPageToken && !error && <Button disabled={repliesLoading} onClick={() => void fetchReplies(true)}>Load more replies</Button>}
           </div>
         </Collapse>
       )}

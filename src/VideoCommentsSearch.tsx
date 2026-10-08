@@ -1,288 +1,127 @@
-import { useState, useEffect } from "react";
-import { useGoogleLogin, googleLogout } from "@react-oauth/google";
-import type { CSSProperties, ChangeEvent, FormEvent } from "react";
-import "./App.css";
-import { Alert, Button, CircularProgress, InputAdornment, Stack, TextField, Typography, Box } from "@mui/material";
-import SearchIcon from "@mui/icons-material/Search";
-import YoutubeList from "./components/youtubeList/YoutubeList";
-import Policy from "./components/TermsAndPolicy";
-import type { CommentThread, CommentThreadsResponse, PageInfo } from "./types/youtube";
-
-const styles: Record<string, CSSProperties> = {
-  root: {
-    height: "100%",
-    display: "flex",
-    flexDirection: "column",
-  },
-  header: {
-    width: "100%",
-    padding: 20,
-    boxSizing: "border-box",
-  },
-  noResults: {
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    height: "100%",
-  },
-  searchResultsList: {
-    overflow: "auto",
-    height: "100%",
-  },
-};
-
-const youtubeApi = "https://www.googleapis.com/youtube/v3";
-const TOKEN_STORAGE_KEY = "yt_oauth";
-const TOKEN_SCOPE_VERSION = "v3"; // bump when OAuth scopes change
-
-interface StoredToken {
-  accessToken: string;
-  expiresAt: number;
-  scopeVersion: string;
-}
-
-function getStoredToken(): string | null {
-  try {
-    const raw = sessionStorage.getItem(TOKEN_STORAGE_KEY);
-    if (!raw) return null;
-    const stored = JSON.parse(raw) as StoredToken;
-    if (stored.scopeVersion !== TOKEN_SCOPE_VERSION || Date.now() >= stored.expiresAt) {
-      sessionStorage.removeItem(TOKEN_STORAGE_KEY);
-      return null;
-    }
-    return stored.accessToken;
-  } catch {
-    return null;
-  }
-}
-
-function storeToken(token: string, expiresIn: number): void {
-  const stored: StoredToken = {
-    accessToken: token,
-    expiresAt: Date.now() + expiresIn * 1000,
-    scopeVersion: TOKEN_SCOPE_VERSION,
-  };
-  sessionStorage.setItem(TOKEN_STORAGE_KEY, JSON.stringify(stored));
-}
-
-function clearStoredToken(): void {
-  sessionStorage.removeItem(TOKEN_STORAGE_KEY);
-}
+import { useState, useEffect, useRef } from 'react';
+import { Alert, Button, CircularProgress, InputAdornment, Stack, TextField, Typography, Box } from '@mui/material';
+import { Search as SearchIcon } from '@mui/icons-material';
+import YoutubeList from './components/youtubeList/YoutubeList';
+import Policy from './components/TermsAndPolicy';
+import { useAuth } from './auth/AuthProvider';
+import { parseVideoId, searchComments, YouTubeApiError } from './api/youtube';
+import type { CommentThread } from './types/youtube';
+import './App.css';
 
 function getUrlParams() {
   const params = new URLSearchParams(window.location.search);
-  return {
-    videoId: params.get("video") || "",
-    query: params.get("query") || "",
-  };
+  return { videoId: params.get('video') || '', query: params.get('query') || '' };
+}
+function updateUrl(videoId: string, query: string, push = false) {
+  const url = new URL(window.location.href);
+  if (videoId) url.searchParams.set('video', videoId); else url.searchParams.delete('video');
+  if (query) url.searchParams.set('query', query); else url.searchParams.delete('query');
+  window.history[push ? 'pushState' : 'replaceState']({}, '', url);
 }
 
 function VideoCommentsSearch() {
-  const { videoId: initialVideoId, query: initialQuery } = getUrlParams();
-  const [videoId, setVideoId] = useState(initialVideoId);
-  const [query, setQuery] = useState(initialQuery);
-  const [accessToken, setAccessToken] = useState<string | null>(getStoredToken);
-  const [searchResultItems, setSearchResultItems] = useState<CommentThread[]>([]);
-  const [nextPageToken, setNextPageToken] = useState<string | undefined>(undefined);
-  const [pageInfo, setPageInfo] = useState<PageInfo | undefined>(undefined);
+  const initial = getUrlParams();
+  const [videoId, setVideoId] = useState(initial.videoId);
+  const [query, setQuery] = useState(initial.query);
+  const { accessToken, error: authError, login, logout, expire, loginAvailable } = useAuth();
+  const [items, setItems] = useState<CommentThread[]>([]);
+  const [nextPageToken, setNextPageToken] = useState<string>();
   const [isLoading, setIsLoading] = useState(false);
+  const [hasSearched, setHasSearched] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const request = useRef<AbortController | null>(null);
 
-  const login = useGoogleLogin({
-    onSuccess: (tokenResponse) => {
-      const expiresIn = tokenResponse.expires_in ?? 3600;
-      storeToken(tokenResponse.access_token, expiresIn);
-      setAccessToken(tokenResponse.access_token);
-    },
-    scope: "https://www.googleapis.com/auth/youtube.readonly",
-  });
-
-  function handleLogout(): void {
-    googleLogout();
-    clearStoredToken();
-    setAccessToken(null);
-    setSearchResultItems([]);
+  function resetSearch() {
+    request.current?.abort();
+    request.current = null;
+    setIsLoading(false);
+    setItems([]);
     setNextPageToken(undefined);
-    setPageInfo(undefined);
+    setError(null);
+    setHasSearched(false);
   }
-
+  useEffect(() => {
+    resetSearch();
+    return () => request.current?.abort();
+  }, [accessToken]);
   useEffect(() => {
     const handlePopState = () => {
-      const { videoId: vid, query: q } = getUrlParams();
-      setVideoId(vid);
-      setQuery(q);
+      const params = getUrlParams();
+      setVideoId(params.videoId);
+      setQuery(params.query);
+      resetSearch();
     };
-    window.addEventListener("popstate", handlePopState);
-    return () => window.removeEventListener("popstate", handlePopState);
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
-  function updateUrlParams(vid: string, q: string): void {
-    const params = new URLSearchParams();
-    if (vid) params.set("video", vid);
-    if (q) params.set("query", q);
-    const search = params.toString() ? `?${params.toString()}` : "";
-    window.history.pushState({}, "", `${window.location.pathname}${search}`);
-  }
-
-  function updateVideoId(event: ChangeEvent<HTMLInputElement>): void {
-    const newVideoId = event.target.value;
-    setVideoId(newVideoId);
-    updateUrlParams(newVideoId, query);
-  }
-
-  function updateSearchTerm(event: ChangeEvent<HTMLInputElement>): void {
-    const newQuery = event.target.value;
-    setQuery(newQuery);
-    updateUrlParams(videoId, newQuery);
-  }
-
-  function performSearch(event: FormEvent, nextPage: boolean): void {
-    event.preventDefault();
-    if (!videoId || !accessToken) return;
-
-    const searchObj: Record<string, string | number | null | undefined> = {
-      part: "snippet",
-      videoId,
-      searchTerms: query || null,
-      maxResults: 30,
-      pageToken: nextPageToken && nextPage ? nextPageToken : null,
-    };
-
-    const params = new URLSearchParams(
-      Object.fromEntries(
-        Object.entries(searchObj)
-          .filter((entry): entry is [string, string | number] => entry[1] != null)
-          .map(([k, v]) => [k, String(v)])
-      )
-    );
-
+  async function performSearch(nextPage = false) {
+    if (!accessToken || isLoading) return;
+    const id = parseVideoId(videoId);
+    if (!id) { setError('Enter a valid YouTube video ID or URL.'); return; }
+    request.current?.abort();
+    const controller = new AbortController();
+    request.current = controller;
     setIsLoading(true);
     setError(null);
-
-    fetch(`${youtubeApi}/commentThreads?${params}`, {
-      headers: { Authorization: `Bearer ${accessToken}` },
-    })
-      .then((res) => {
-        if (!res.ok) {
-          return res.json().then((body: { error?: { message?: string; errors?: Array<{ reason?: string }> } }) => {
-            const reason = body?.error?.errors?.[0]?.reason;
-            const knownMessages: Record<string, string> = {
-              quotaExceeded: "YouTube API quota exceeded. Please try again later.",
-              forbidden: "Access to this video's comments is forbidden.",
-            };
-            throw new Error(
-              (reason !== undefined ? knownMessages[reason] : undefined) ??
-                body?.error?.message ??
-                `API error ${res.status}`
-            );
-          });
-        }
-        return res.json() as Promise<CommentThreadsResponse>;
-      })
-      .then((data) => {
-        setSearchResultItems(data.items ?? []);
-        setNextPageToken(data.nextPageToken);
-        setPageInfo(data.pageInfo);
-      })
-      .catch((err: unknown) => {
-        setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
-      })
-      .finally(() => {
-        setIsLoading(false);
+    if (!nextPage) { setItems([]); setNextPageToken(undefined); updateUrl(id, query.trim(), true); }
+    try {
+      const data = await searchComments(id, query.trim(), accessToken, nextPage ? nextPageToken : undefined, controller.signal);
+      if (controller.signal.aborted) return;
+      setItems(previous => {
+        const combined = nextPage ? [...previous, ...(data.items ?? [])] : data.items ?? [];
+        return combined.filter((item, index) => combined.findIndex(other => other.id === item.id) === index);
       });
+      setNextPageToken(data.nextPageToken);
+      setHasSearched(true);
+    } catch (failure) {
+      if (controller.signal.aborted) return;
+      if (failure instanceof YouTubeApiError && failure.status === 401) expire();
+      else setError(failure instanceof Error ? failure.message : 'Unable to search comments. Please try again.');
+    } finally {
+      if (!controller.signal.aborted) setIsLoading(false);
+    }
   }
 
   return (
-    <div style={styles.root}>
-      <div style={styles.header} className="appHeader">
-        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 1.5 }}>
-          <Typography variant="h6" component="h1" sx={{ fontWeight: 600, letterSpacing: 0.5 }}>
-            YouTube Comment Search
-          </Typography>
-          {accessToken && (
-            <Button variant="outlined" size="small" onClick={handleLogout}>
-              Logout
-            </Button>
-          )}
+    <div className="appRoot">
+      <div className="appHeader">
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5, gap: 1 }}>
+          <Typography variant="h6" component="h1" sx={{ fontWeight: 600 }}>YouTube Comment Search</Typography>
+          {accessToken && <Button variant="outlined" size="small" onClick={logout}>Logout</Button>}
         </Box>
-        <form onSubmit={(e) => performSearch(e, false)}>
-          <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5} alignItems="flex-start">
-            <TextField
-              type="text"
-              label="Video ID"
-              helperText="e.g. kJQP7kiw5Fk"
-              value={videoId}
-              required
-              onChange={updateVideoId}
-              autoFocus
-              size="small"
-              sx={{ minWidth: 180 }}
-            />
-            <TextField
-              type="search"
-              label="Search term"
-              helperText="e.g. song"
-              value={query}
-              onChange={updateSearchTerm}
-              size="small"
-              sx={{ minWidth: 200, flexGrow: 1 }}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchIcon fontSize="small" />
-                  </InputAdornment>
-                ),
-              }}
-            />
-            <Button
-              variant="contained"
-              color="primary"
-              type="submit"
-              disabled={isLoading || !accessToken}
-              sx={{ mt: "4px", height: 40, whiteSpace: "nowrap" }}
-            >
-              Search
-            </Button>
+        {import.meta.env.DEV && import.meta.env.VITE_ENABLE_MOCKS === 'true' && <Alert role="note" severity="info" sx={{ mb: 2 }}>Demo mode: login and comments are simulated.</Alert>}
+        <form onSubmit={event => { event.preventDefault(); void performSearch(); }}>
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} alignItems="flex-start">
+            <TextField type="text" label="YouTube video ID or URL" helperText="Paste a video link or ID, e.g. kJQP7kiw5Fk" value={videoId} required
+              onChange={event => { resetSearch(); setVideoId(event.target.value); }}
+              autoFocus size="small" sx={{ minWidth: 180, flex: 1 }} />
+            <TextField type="search" label="Search term" helperText="Leave blank to browse comments" value={query}
+              onChange={event => { resetSearch(); setQuery(event.target.value); }}
+              size="small" sx={{ minWidth: 200, flex: 1 }} InputProps={{ startAdornment: <InputAdornment position="start"><SearchIcon fontSize="small" /></InputAdornment> }} />
+            <Button variant="contained" type="submit" disabled={isLoading || !accessToken} sx={{ height: 40 }}>Search</Button>
           </Stack>
         </form>
       </div>
-      <div style={styles.searchResultsList} className="searchResultsList">
+      <main className="searchResultsList" aria-label="Comment search results" aria-busy={isLoading}>
+        {authError && <Alert severity="error" sx={{ m: 2 }}>{authError}</Alert>}
         {!accessToken ? (
-          <div style={styles.noResults}>
-            <Stack alignItems="center" spacing={1.5}>
-              <Typography color="text.secondary">Please log in with Google to search comments.</Typography>
-              <Button variant="contained" size="small" onClick={() => login()}>
-                Login with Google
-              </Button>
-            </Stack>
-          </div>
-        ) : isLoading ? (
-          <div style={styles.noResults}>
-            <CircularProgress />
-          </div>
-        ) : error ? (
-          <div style={{ padding: 16 }}>
-            <Alert severity="error">{error}</Alert>
-          </div>
-        ) : searchResultItems.length === 0 ? (
-          <div style={styles.noResults}>
-            <Typography color="text.secondary">No results found</Typography>
-          </div>
+          <Stack className="emptyState" alignItems="center" spacing={1.5}>
+            <Typography color="text.secondary">Please log in with Google to search comments.</Typography>
+            <Button variant="contained" size="small" disabled={!loginAvailable} onClick={login}>Login with Google</Button>
+          </Stack>
         ) : (
-          <div style={{ height: "100%" }}>
-            <YoutubeList
-              items={searchResultItems}
-              pageInfo={pageInfo}
-              search={performSearch}
-              accessToken={accessToken ?? ""}
-            />
-          </div>
+          <>
+            {error && <Alert severity="error" sx={{ m: 2 }}>{error}</Alert>}
+            {items.length > 0 && <><Typography role="status" sx={{ p: 2 }}>{items.length} comments loaded</Typography><YoutubeList items={items} accessToken={accessToken} /></>}
+            {isLoading && <Stack className="emptyState" alignItems="center"><CircularProgress aria-label="Loading comments" /></Stack>}
+            {!isLoading && !error && items.length === 0 && <div className="emptyState"><Typography color="text.secondary">{hasSearched ? 'No results found' : 'Enter a video and search its comments.'}</Typography></div>}
+            {nextPageToken && <Box sx={{ p: 2, textAlign: 'center' }}><Button variant="outlined" disabled={isLoading} onClick={() => void performSearch(true)}>Load more comments</Button></Box>}
+          </>
         )}
-      </div>
+      </main>
       <Policy />
     </div>
   );
 }
-
 export default VideoCommentsSearch;
-

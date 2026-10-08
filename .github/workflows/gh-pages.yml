@@ -1,28 +1,58 @@
-name: Deployment
+name: Checks and deployment
 on:
+  pull_request:
   push:
-    branches:
-      - master
+    branches: [master]
+permissions:
+  contents: read
 jobs:
-  deploy:
+  check:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
         with:
-          version: 10
-      - name: Use Node.js
-        uses: actions/setup-node@v4
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm typecheck
+      - run: pnpm test:coverage
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm test:e2e
+      - run: pnpm build:storybook
+      - run: pnpm test:stories
+      - run: pnpm build
+        env:
+          VITE_BASE_PATH: /
+      - uses: actions/upload-artifact@v4
         with:
-          node-version: 22
-          cache: 'pnpm'
-      - name: Install Packages
-        run: pnpm install --frozen-lockfile
-      - name: Build page
-        run: pnpm build
+          name: site
+          path: dist
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: playwright-report
+          retention-days: 7
+  deploy:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    needs: check
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    concurrency:
+      group: gh-pages
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: site
+          path: dist
       - name: Deploy to gh-pages
-        uses: peaceiris/actions-gh-pages@v3
+        uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./dist
+          cname: video-comment-search.slpixe.com
