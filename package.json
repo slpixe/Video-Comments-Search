@@ -1,43 +1,60 @@
 {
   "name": "video-comments-search",
   "version": "0.1.0",
-  "homepage": "https://slpixe.github.io/Video-Comments-Search",
+  "homepage": "https://video-comment-search.slpixe.com",
   "private": true,
+  "packageManager": "pnpm@10.11.0",
+  "engines": {
+    "node": ">=22.12.0"
+  },
   "dependencies": {
-    "@emotion/react": "^11.13.0",
-    "@emotion/styled": "^11.13.0",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
     "@mui/icons-material": "^5.18.0",
-    "@mui/material": "^5.16.0",
+    "@mui/material": "^5.18.0",
     "@react-oauth/google": "^0.13.5",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
   },
   "devDependencies": {
+    "@playwright/test": "^1.64.0",
+    "@storybook/addon-docs": "^10.6.1",
+    "@storybook/react-vite": "^10.6.1",
     "@testing-library/jest-dom": "^6.9.1",
-    "@testing-library/react": "^16.3.2",
-    "@testing-library/user-event": "^14.6.1",
-    "@types/react": "^19.2.14",
-    "@types/react-dom": "^19.2.3",
-    "@vitejs/plugin-react": "^6.0.1",
-    "@vitest/coverage-v8": "^4.1.5",
-    "gh-pages": "^6.0.0",
+    "@testing-library/react": "^16.3.3",
+    "@testing-library/user-event": "^14.6.7",
+    "@types/react": "^18.3.31",
+    "@types/react-dom": "^18.3.7",
+    "@vitejs/plugin-react": "^6.1.2",
+    "@vitest/coverage-v8": "^4.1.11",
     "jsdom": "^29.1.1",
-    "msw": "^2.14.3",
+    "msw": "^2.15.0",
+    "msw-storybook-addon": "^3.0.3",
+    "storybook": "^10.6.1",
     "typescript": "^6.0.3",
-    "vite": "^8.0.10",
-    "vitest": "^4.1.5"
+    "vite": "^8.3.3",
+    "vitest": "^4.1.11"
   },
   "scripts": {
     "start": "vite",
-    "build": "vite build",
+    "start:mock": "vite --mode mock",
+    "typecheck": "tsc --noEmit",
+    "build": "pnpm typecheck && vite build",
     "preview": "vite preview",
-    "deploy": "npm run build && gh-pages -d dist",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "storybook": "storybook dev -p 6006 --disable-telemetry",
+    "build:storybook": "storybook build --disable-telemetry",
+    "check": "pnpm typecheck && pnpm test && pnpm build && pnpm test:e2e && pnpm build:storybook && pnpm test:stories",
+    "test:stories": "playwright test --config playwright.storybook.config.ts"
   },
   "msw": {
     "workerDirectory": [
       "public"
     ]
-  }
+  },
+  "type": "module"
 }

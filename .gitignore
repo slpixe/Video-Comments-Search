@@ -23,3 +23,7 @@ yarn-error.log*
 
 # Playwright MCP output
 .playwright-mcp/
+.env
+storybook-static/
+playwright-report/
+test-results/
