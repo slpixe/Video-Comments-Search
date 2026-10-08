@@ -23,8 +23,8 @@ Deployment and OAuth configuration were updated with the owner’s authorization
   [Original email](https://mail.google.com/mail/u/0/#all/1a1182a7af4c9426)
 
 Verification rejection is not evidence that every Google login now fails.
-The live client state, audience/test users, authorized origins and exact Google
-error still need checking in Cloud Console and a real-browser login. The app's
+The client, production audience and authorized origins have now been checked in
+Cloud Console. A real-browser login still needs checking after HTTPS is ready. The app's
 local tests simulate auth and cannot establish those external facts.
 
 Google's [OAuth policies](https://developers.google.com/identity/protocols/oauth2/policies)
@@ -63,8 +63,9 @@ to keep an unused client.
 - YouTube Data API v3 is enabled. The app already requests `youtube.readonly`,
   but this sensitive scope was missing from the Console's review configuration.
   It has now been declared, with a truthful usage justification.
-- Google Search Console ownership verification for `slpixe.com` is being added through
-  [domains MR #32](https://gitlab.com/slpixe/domains/-/merge_requests/32).
+- Google Search Console confirmed ownership of `slpixe.com` after the TXT record
+  was reviewed, merged and applied through
+  [domains MR #32](https://gitlab.com/slpixe/domains/-/merge_requests/32). Keep this TXT record to retain verification.
 - A real OAuth login and search still need verification after HTTPS is ready.
   Google requires an unlisted YouTube demo showing consent and scope use.
   No complete verification submission has been made yet.
