@@ -142,9 +142,10 @@ to keep an unused client.
   referrers `localhost`, `https://slpixe.github.io/*` and `*.github.dev`. The live
   hostname is absent. These restrictions were inspected read-only; the key value
   was not revealed and no credential configuration was changed.
-- The client's previously reported inactivity deadline was 3 November. A real
-  login has now occurred, but Console's updated last-use/deadline has not yet
-  been checked. A successful real comment search is still outstanding.
+- The client detail page now reports **Last used date: 7 October 2026**, with
+  a note that this data could be delayed by a day or more. This supersedes the
+  May last-use date behind the earlier inactivity warning. A real login has
+  also completed on 9 October. A successful real comment search is outstanding.
 
 
 ## Demo required if sensitive-scope verification is still needed
