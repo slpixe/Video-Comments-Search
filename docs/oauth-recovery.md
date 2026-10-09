@@ -24,9 +24,11 @@ Deployment and OAuth configuration were updated with the owner’s authorization
 
 Verification rejection is not evidence that every Google login now fails.
 The client, production audience and authorized origins have now been checked in
-Cloud Console. The live Google consent flow now loads, but the YouTube permission
-grant and a real comment search still need completion. The app's local tests
-simulate auth and cannot establish those external facts.
+Cloud Console. A real Google login completed on 9 October after the owner
+approved read-only consent. Public comment requests still fail because
+`youtube.readonly` does not authorize the comment-list endpoints (see the latest
+follow-up below). The app's local tests simulate auth and cannot establish those
+external facts.
 
 Google's [OAuth policies](https://developers.google.com/identity/protocols/oauth2/policies)
 allow deletion of clients inactive for at least six months. Retain each needed
@@ -64,7 +66,8 @@ to keep an unused client.
 - Audience is already **External / In production**, with 2 of the 100 unverified users used.
 - YouTube Data API v3 is enabled. The app already requests `youtube.readonly`,
   but this sensitive scope was missing from the Console's review configuration.
-  It has now been declared, with a truthful usage justification.
+  It was declared with a usage justification. The 9 October investigation below
+  corrects that justification's mistaken claim that this scope authorizes comments.
 - Google Search Console confirmed ownership of `slpixe.com` after the TXT record
   was reviewed, merged and applied through
   [domains MR #32](https://gitlab.com/slpixe/domains/-/merge_requests/32). Keep this TXT record to retain verification.
@@ -109,7 +112,47 @@ to keep an unused client.
 - The real unlisted demo URL remains outstanding (already requested on 8 October).
   Sensitive-scope review has not been submitted. Do not duplicate a review in progress.
 
-## Demo required for scope verification
+## Live login investigation (9 October 2026, after owner approval)
+
+- The owner approved continuing read-only consent. A genuine Google login now
+  completes on the live domain using the existing account/client. Searching the
+  public video `kJQP7kiw5Fk` for `music` returns **Request had insufficient
+  authentication scopes.** A fresh login reproduces the same failure.
+- A temporary local diagnostic checked `TokenResponse.scope` before accepting
+  the session. The real callback contains `youtube.readonly`, so the failure is
+  not simply an unchecked permission or a missing scope in the callback. A unit
+  regression for partial grants passed, but that diagnostic change was removed
+  because it does not solve the actual API contract mismatch.
+- Google's public [YouTube Data API Discovery metadata](https://www.googleapis.com/discovery/v1/apis/youtube/v3/rest)
+  lists only `https://www.googleapis.com/auth/youtube.force-ssl` for
+  `commentThreads.list` and `comments.list`. `youtube.readonly` is supported by
+  other methods such as `videos.list`, but not these comment methods. The
+  `youtube.force-ssl` permission can **see, edit, and permanently delete** videos,
+  ratings, comments and captions. The owner's read-only approval does not grant
+  that broader permission. No broader scope was requested or granted.
+- Do not submit the saved sensitive-scope justification: its claim that
+  `youtube.readonly` supports these comment requests is incorrect. Branding
+  remains approved and published; no scope review has been submitted.
+- The recommended alternative is to fetch public comments using a YouTube API
+  key restricted to this live hostname and YouTube Data API v3, and keep basic
+  Google login without a YouTube account permission. Approval for that change
+  and creating a restricted key if needed was requested in this chat. Await the
+  owner's choice; do not repeat the same approval request on scheduled runs.
+- The existing **API key 1** is restricted to **YouTube Data API v3**, with HTTP
+  referrers `localhost`, `https://slpixe.github.io/*` and `*.github.dev`. The live
+  hostname is absent. These restrictions were inspected read-only; the key value
+  was not revealed and no credential configuration was changed.
+- The client's previously reported inactivity deadline was 3 November. A real
+  login has now occurred, but Console's updated last-use/deadline has not yet
+  been checked. A successful real comment search is still outstanding.
+
+
+## Demo required if sensitive-scope verification is still needed
+
+The API-key/basic-login alternative above would remove the need for a YouTube
+sensitive scope and its demo. Do not pursue the old read-only submission. If the
+owner explicitly chooses the broader OAuth approach, update the requested scope,
+justification and policy text to match before preparing a real demo.
 
 Record the real production app (without mock mode), showing the address bar,
 Google login/account selection and the full consent flow for this project's
@@ -148,7 +191,7 @@ until Google confirms it.
    | Terms of service | `https://video-comment-search.slpixe.com/terms.html` |
    | Web client JavaScript origin | `https://video-comment-search.slpixe.com` |
    | Local development origin | The actual Vite origin, usually `http://localhost:5173` |
-   | Requested API scope | `https://www.googleapis.com/auth/youtube.readonly` |
+   | Currently configured API scope (insufficient for comments) | `https://www.googleapis.com/auth/youtube.readonly` |
 
    This app uses the Google Identity Services popup token flow. It does not
    have a backend OAuth callback; do not add a fabricated redirect URI.
