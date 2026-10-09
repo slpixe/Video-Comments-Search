@@ -24,8 +24,9 @@ Deployment and OAuth configuration were updated with the owner’s authorization
 
 Verification rejection is not evidence that every Google login now fails.
 The client, production audience and authorized origins have now been checked in
-Cloud Console. A real-browser login still needs checking after HTTPS is ready. The app's
-local tests simulate auth and cannot establish those external facts.
+Cloud Console. The live Google consent flow now loads, but the YouTube permission
+grant and a real comment search still need completion. The app's local tests
+simulate auth and cannot establish those external facts.
 
 Google's [OAuth policies](https://developers.google.com/identity/protocols/oauth2/policies)
 allow deletion of clients inactive for at least six months. Retain each needed
@@ -71,6 +72,28 @@ to keep an unused client.
   Google requires an unlisted YouTube demo showing consent and scope use.
   No complete verification submission has been made yet. The Verification centre
   requires branding to be verified and published before enabling sensitive-scope submission.
+
+## Follow-up (9 October 2026)
+
+- Normal local DNS resolution now works. The homepage, privacy and terms pages
+  returned HTTP 200 over HTTPS with valid TLS, without an address override.
+- After the 24-hour ownership propagation window, **I have fixed the issues →
+  Proceed** requested branding reverification. Google completed its automatic
+  check and returned only the app-name identity issue; the previous domain
+  ownership and homepage-name mismatch findings were absent.
+- Google specifically rejected **YouTube Comment Search**. Its
+  [identity guidance](https://support.google.com/cloud/answer/13804963?hl=en-GB)
+  prohibits Google product names in app names. The site name is being changed to
+  **Slpixe Video Comment Search**, including its title, manifest and policies;
+  the Console must match the published site before retrying.
+- Real sign-in from the live origin reached Google account selection, the
+  unverified-app warning, profile/email sign-in and then the unchecked
+  **View your YouTube account** permission. No YouTube access was granted and
+  no real search was run. Action-time confirmation was requested because the
+  browser policy requires it for a new sensitive-data permission grant. Do not
+  repeat this request on unchanged scheduled runs; await the owner's response.
+- The real unlisted demo URL remains outstanding (already requested on 8 October).
+  Sensitive-scope review has not been submitted. Do not duplicate a review in progress.
 
 ## Demo required for scope verification
 
