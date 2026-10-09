@@ -83,15 +83,29 @@ to keep an unused client.
   ownership and homepage-name mismatch findings were absent.
 - Google specifically rejected **YouTube Comment Search**. Its
   [identity guidance](https://support.google.com/cloud/answer/13804963?hl=en-GB)
-  prohibits Google product names in app names. The site name is being changed to
-  **Slpixe Video Comment Search**, including its title, manifest and policies;
-  the Console must match the published site before retrying.
+  prohibits Google product names in app names. **Slpixe Video Comment Search**
+  was published through [PR #38](https://github.com/slpixe/Video-Comments-Search/pull/38)
+  after all CI checks passed. The live browser heading/title, manifest and policy
+  pages match the new name, as does the saved Console configuration.
+- After Pages finished publishing, the corrected identity was submitted for
+  reverification. Google **verified the branding**. **Publish branding** was
+  completed, and the Console confirms **Your branding has been verified and
+  is being shown to users**. Do not resubmit or change this approved branding
+  without a concrete need.
+- **Prepare for verification** is now enabled. Its review summary confirms the
+  saved scope justification and reports **Missing the following fields for one
+  or more requested scopes: demo video**. The video link is **Not provided**
+  and **Confirm** is disabled. The sensitive YouTube scope remains unverified;
+  no scope-review submission has been made.
 - Real sign-in from the live origin reached Google account selection, the
   unverified-app warning, profile/email sign-in and then the unchecked
   **View your YouTube account** permission. No YouTube access was granted and
   no real search was run. Action-time confirmation was requested because the
   browser policy requires it for a new sensitive-data permission grant. Do not
   repeat this request on unchanged scheduled runs; await the owner's response.
+- Read-only gog confirmed a further inactive-client warning dated 8 October.
+  [Email](https://mail.google.com/mail/u/0/#all/1a11d6555e5867cb).
+  No verification approval email was present in the recent matching messages.
 - The real unlisted demo URL remains outstanding (already requested on 8 October).
   Sensitive-scope review has not been submitted. Do not duplicate a review in progress.
 
