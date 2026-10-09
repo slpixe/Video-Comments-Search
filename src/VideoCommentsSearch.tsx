@@ -87,7 +87,7 @@ function VideoCommentsSearch() {
     <div className="appRoot">
       <div className="appHeader">
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5, gap: 1 }}>
-          <Typography variant="h6" component="h1" sx={{ fontWeight: 600 }}>YouTube Comment Search</Typography>
+          <Typography variant="h6" component="h1" sx={{ fontWeight: 600 }}>Slpixe Video Comment Search</Typography>
           {accessToken && <Button variant="outlined" size="small" onClick={logout}>Logout</Button>}
         </Box>
         <Typography color="text.secondary" sx={{ mb: 2 }}>Search and browse public comments and replies on YouTube videos. Sign in with Google to authorize read-only YouTube access.</Typography>
