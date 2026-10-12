@@ -4,7 +4,7 @@ import { http, HttpResponse } from 'msw';
 import { YOUTUBE_API } from '../api/youtube';
 import { commentThreadsFixture } from '../mocks/fixtures/commentThreads';
 import CommentItem from './CommentItem';
-const meta = { title: 'Search/Comment', component: CommentItem, tags: ['autodocs'], args: { item: commentThreadsFixture.items[0], index: 0, accessToken: 'mock-access-token' } } satisfies Meta<typeof CommentItem>;
+const meta = { title: 'Search/Comment', component: CommentItem, tags: ['autodocs'], args: { item: commentThreadsFixture.items[0], index: 0 } } satisfies Meta<typeof CommentItem>;
 export default meta;
 type Story = StoryObj<typeof meta>;
 export const WithReplies: Story = {};

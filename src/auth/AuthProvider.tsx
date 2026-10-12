@@ -31,7 +31,8 @@ function GoogleSession({ children }: { children: ReactNode }) {
     return () => window.clearTimeout(timer);
   }, [token, expire]);
   const googleLogin = useGoogleLogin({
-    scope: 'https://www.googleapis.com/auth/youtube.readonly',
+    scope: 'openid email profile',
+    include_granted_scopes: false,
     onSuccess: (response) => {
       setToken(storeToken(response.access_token, response.expires_in));
       setError(null);

@@ -8,13 +8,11 @@ import {
 } from '@mui/icons-material';
 import type { CommentThread, Reply } from "../types/youtube";
 
-import { listReplies, YouTubeApiError } from '../api/youtube';
-import { useAuth } from '../auth/AuthProvider';
+import { listReplies } from '../api/youtube';
 
 interface Props {
   item: CommentThread;
   index: number;
-  accessToken: string;
 }
 
 function formatDate(iso: string): string {
@@ -25,7 +23,7 @@ function formatDate(iso: string): string {
   });
 }
 
-function CommentItem({ item, index, accessToken }: Props) {
+function CommentItem({ item, index }: Props) {
   const [expanded, setExpanded] = useState(false);
   const [replies, setReplies] = useState<Reply[]>([]);
   const [repliesLoading, setRepliesLoading] = useState(false);
@@ -33,7 +31,6 @@ function CommentItem({ item, index, accessToken }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [nextPageToken, setNextPageToken] = useState<string>();
   const request = useRef<AbortController | null>(null);
-  const { expire } = useAuth();
   useEffect(() => () => request.current?.abort(), []);
   const { topLevelComment, totalReplyCount } = item.snippet;
   const { textOriginal, authorDisplayName, likeCount, publishedAt } =
@@ -47,15 +44,14 @@ function CommentItem({ item, index, accessToken }: Props) {
     setRepliesLoading(true);
     setError(null);
     try {
-      const data = await listReplies(topLevelComment.id, accessToken, nextPage ? nextPageToken : undefined, controller.signal);
+      const data = await listReplies(topLevelComment.id, nextPage ? nextPageToken : undefined, controller.signal);
       if (controller.signal.aborted) return;
       setReplies(previous => nextPage ? [...previous, ...(data.items ?? [])] : data.items ?? []);
       setNextPageToken(data.nextPageToken);
       setRepliesFetched(true);
     } catch (failure) {
       if (controller.signal.aborted) return;
-      if (failure instanceof YouTubeApiError && failure.status === 401) expire();
-      else setError(failure instanceof Error ? failure.message : 'Unable to load replies.');
+      setError(failure instanceof Error ? failure.message : 'Unable to load replies.');
     } finally {
       if (!controller.signal.aborted) setRepliesLoading(false);
     }

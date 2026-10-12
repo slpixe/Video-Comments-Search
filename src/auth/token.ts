@@ -1,5 +1,5 @@
 export const TOKEN_STORAGE_KEY = 'yt_oauth';
-export const TOKEN_SCOPE_VERSION = 'v3';
+export const TOKEN_SCOPE_VERSION = 'v4-basic-login';
 export interface StoredToken {
   accessToken: string;
   expiresAt: number;

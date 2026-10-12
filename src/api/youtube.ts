@@ -5,32 +5,35 @@ const messages: Record<string, string> = {
   forbidden: "Access to this video's comments is forbidden.",
   commentsDisabled: 'Comments are disabled for this video.',
   videoNotFound: 'This video could not be found.',
+  keyInvalid: 'The YouTube API key was rejected. Contact the app owner.',
   accessNotConfigured: 'The YouTube Data API is not enabled for this app. Contact the app owner.',
 };
 export class YouTubeApiError extends Error {
   constructor(message: string, public status: number) { super(message); }
 }
-async function request<T>(path: string, params: Record<string, string>, accessToken: string, signal?: AbortSignal): Promise<T> {
-  const response = await fetch(`${YOUTUBE_API}/${path}?${new URLSearchParams(params)}`, {
-    headers: { Authorization: `Bearer ${accessToken}` }, signal,
-  });
+async function request<T>(path: string, params: Record<string, string>, signal?: AbortSignal): Promise<T> {
+  const key = import.meta.env.VITE_YOUTUBE_API_KEY;
+  if (!key || key === 'your-restricted-youtube-api-key') {
+    throw new YouTubeApiError('YouTube search is not configured. Contact the app owner.', 0);
+  }
+  const response = await fetch(`${YOUTUBE_API}/${path}?${new URLSearchParams({ ...params, key })}`, { signal });
   if (!response.ok) {
     const body = await response.json().catch(() => null) as { error?: { message?: string; errors?: { reason?: string }[] } } | null;
     const reason = body?.error?.errors?.[0]?.reason;
-    throw new YouTubeApiError(response.status === 401 ? 'Your Google session expired. Please log in again.'
+    throw new YouTubeApiError(response.status === 401 ? messages.keyInvalid
       : (reason && messages[reason]) || body?.error?.message || `YouTube API error ${response.status}. Please try again.`, response.status);
   }
   return response.json() as Promise<T>;
 }
-export function searchComments(videoId: string, query: string, accessToken: string, pageToken?: string, signal?: AbortSignal) {
+export function searchComments(videoId: string, query: string, pageToken?: string, signal?: AbortSignal) {
   return request<CommentThreadsResponse>('commentThreads', {
     part: 'snippet', videoId, maxResults: '30', ...(query ? { searchTerms: query } : {}), ...(pageToken ? { pageToken } : {}),
-  }, accessToken, signal);
+  }, signal);
 }
-export function listReplies(parentId: string, accessToken: string, pageToken?: string, signal?: AbortSignal) {
+export function listReplies(parentId: string, pageToken?: string, signal?: AbortSignal) {
   return request<CommentsListResponse>('comments', {
     part: 'snippet', parentId, maxResults: '100', ...(pageToken ? { pageToken } : {}),
-  }, accessToken, signal);
+  }, signal);
 }
 
 export function parseVideoId(input: string): string | null {

@@ -14,7 +14,7 @@
 </head>
 <body>
   <h1>Privacy Policy</h1>
-  <p>Last updated: 9 October 2026</p>
+  <p>Last updated: 12 October 2026</p>
 
   <h2>About This App</h2>
   <p>
@@ -24,16 +24,22 @@
 
   <h2>Data We Collect</h2>
   <p>
-    We do not collect, store, or transmit any personal data ourselves. We do not use analytics, cookies,
-    or tracking of any kind.
+    We do not operate an account database, analytics or tracking. Login state is kept in your
+    browser as described below. Google handles sign-in and API requests under its own privacy policy.
   </p>
 
   <h2>Google OAuth &amp; YouTube API</h2>
   <p>
-    This application uses the <strong>YouTube Data API v3</strong> and Google OAuth 2.0 to authenticate
-    you and retrieve public YouTube comment data on your behalf. When you log in with Google, an
-    OAuth access token is issued by Google and stored only in your browser's <code>sessionStorage</code>
-    for the duration of your session. It is never sent to any server other than Google's own APIs.
+    Google login requests only basic sign-in permissions (openid, email and profile), not access
+    to your YouTube account. Google issues a login access token, which is kept in browser
+    <code>sessionStorage</code> until it expires or you log out. We do not fetch or store your
+    name, email address or profile details in an account database.
+  </p>
+  <p>
+    Public comments and replies are fetched directly from the <strong>YouTube Data API v3</strong>
+    using the app owner's website-restricted API key. Your Google token is not sent with these
+    requests. Google receives the submitted video ID, search term and normal request information.
+    Searches use the app project's shared API quota; signing in does not provide your own API key.
   </p>
   <p>
     Your use of this application is subject to <a href="https://www.youtube.com/t/terms" target="_blank" rel="noopener noreferrer">YouTube's Terms of Service</a>
@@ -46,8 +52,8 @@
 
   <h2>Use and Retention of Google Data</h2>
   <p>
-    We use the access token only to authorize YouTube API requests for the comments and replies you
-    choose to view. Comment data is held in browser memory while displayed. It is cleared when you
+    The login token maintains the sign-in session in your browser and is not used to read or
+    change your YouTube account. Comment data is held in browser memory while displayed. It is cleared when you
     log out, replace the search, or close the page. The saved token is removed when it expires or
     you log out; your browser also clears session storage when its browsing session ends.
     We do not operate a server-side account database or retain a copy of your Google data.
@@ -62,7 +68,7 @@
   <h2>Third-Party Services</h2>
   <p>
     All comment data displayed is fetched directly from the YouTube Data API v3 and is publicly
-    available. We do not share your data with any third parties.
+    available. We do not send your login token to the YouTube comment endpoints or share it with other services.
   </p>
 
   <h2>Contact</h2>

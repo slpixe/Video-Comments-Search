@@ -6,10 +6,10 @@ export const handlers = [
   http.get(`${YOUTUBE_API}/commentThreads`, async ({ request }) => {
     const url = new URL(request.url);
     const videoId = url.searchParams.get('videoId');
-    if (!request.headers.get('Authorization')?.startsWith('Bearer ')) {
-      return HttpResponse.json({ error: { message: 'Missing access token' } }, { status: 401 });
+    if (!url.searchParams.get('key') || request.headers.has('Authorization')) {
+      return HttpResponse.json({ error: { message: 'Expected API key without OAuth token' } }, { status: 401 });
     }
-    if (videoId === 'expired0000') return HttpResponse.json({ error: { message: 'Invalid credentials' } }, { status: 401 });
+    if (videoId === 'keybad00000') return HttpResponse.json({ error: { errors: [{ reason: 'keyInvalid' }] } }, { status: 401 });
     if (videoId === 'quota000000') return HttpResponse.json({ error: { errors: [{ reason: 'quotaExceeded' }] } }, { status: 403 });
     if (videoId === 'disabled000') return HttpResponse.json({ error: { errors: [{ reason: 'commentsDisabled' }] } }, { status: 403 });
     if (videoId === 'slow0000000') await delay(2000);
@@ -24,6 +24,9 @@ export const handlers = [
   }),
   http.get(`${YOUTUBE_API}/comments`, ({ request }) => {
     const url = new URL(request.url);
+    if (!url.searchParams.get('key') || request.headers.has('Authorization')) {
+      return HttpResponse.json({ error: { message: 'Expected API key without OAuth token' } }, { status: 401 });
+    }
     const parent = commentThreadsFixture.items.find(item => item.snippet.topLevelComment.id === url.searchParams.get('parentId'));
     const items = parent?.replies?.comments ?? [];
     return HttpResponse.json({ kind: 'youtube#commentListResponse', items, pageInfo: { totalResults: items.length, resultsPerPage: 100 } });

@@ -28,9 +28,9 @@ export const QuotaError: Story = { play: async ({ canvasElement }) => {
   const canvas = await submit(canvasElement, 'quota000000');
   await expect(await canvas.findByRole('alert')).toHaveTextContent('quota exceeded');
 } };
-export const ExpiredSession: Story = { play: async ({ canvasElement }) => {
-  const canvas = await submit(canvasElement, 'expired0000');
-  await expect(await canvas.findByRole('alert')).toHaveTextContent('session expired');
+export const ApiKeyError: Story = { play: async ({ canvasElement }) => {
+  const canvas = await submit(canvasElement, 'keybad00000');
+  await expect(await canvas.findByRole('alert')).toHaveTextContent('API key was rejected');
 } };
 
 export const Loading: Story = {
