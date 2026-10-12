@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Alert, Button, CircularProgress, InputAdornment, TextField } from '@mui/material';
-import { SearchRounded, SmartDisplayOutlined, ForumOutlined, OpenInNewRounded } from '@mui/icons-material';
+import { SearchRounded, SmartDisplayOutlined, OpenInNewRounded } from '@mui/icons-material';
 import YoutubeList from './components/youtubeList/YoutubeList';
 import CopySearchLink from './components/CopySearchLink';
 import Policy from './components/TermsAndPolicy';
@@ -89,7 +89,7 @@ function VideoCommentsSearch() {
       <a className="skipLink" href="#comment-results">Skip to comments</a>
       <header className="masthead pageWidth">
         <div className="brand">
-          <span className="brandMark" aria-hidden="true"><ForumOutlined /></span>
+          <img className="brandMark" src={`${import.meta.env.BASE_URL}logo-64.png`} srcSet={`${import.meta.env.BASE_URL}logo-192.png 3x`} width="40" height="40" alt="" />
           <h1><span>Slpixe</span> Video Comment Search</h1>
         </div>
         {accessToken && <Button variant="outlined" size="small" onClick={logout}>Logout</Button>}

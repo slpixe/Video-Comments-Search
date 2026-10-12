@@ -1,0 +1,6 @@
+Generated with the built-in imagegen tool on 13 October 2026.
+Reference: the user-approved Sculpted Coral concept from this chat.
+
+Use case: background-extraction.
+Edit target: the supplied Sculpted Coral concept board.
+Extract ONLY the large upper sculpted coral icon into a single production app-icon master on a genuinely transparent background. Preserve its approved design faithfully: the folded coral ribbon around a graphite aperture, ivory play triangle, lower-left folded comment tail, lower-right search handle, fine copper edge highlights, satin material and dimensional shading. Preserve the same geometry and warm colors. Remove the cream backdrop, external floor/contact shadow, ALL lower sample icons and ALL swatches. Keep the dark graphite aperture as part of the icon, not transparent. No new objects, text, borders or app tiles. Straight-on square composition, one icon only, centered with about 5 percent transparent padding on each side, fully visible uncropped tail and handle. Crisp silhouette and clean alpha edges. Do not redesign, flatten or simplify the approved sculpture.

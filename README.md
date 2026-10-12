@@ -81,6 +81,20 @@ API key, and comment/reply states; several stories have interaction assertions.
 The Playwright server uses port 4173. Keep that port free to avoid accidentally
 reusing an unrelated server. Traces and HTML reports are retained for failures.
 
+## App icons
+
+The Sculpted Coral icon combines a folded comment bubble, a search lens and a
+play symbol. Its transparent imagegen master is saved in
+`assets/branding/sculpted-coral-master.png`; the editing prompt is beside it in
+`assets/branding/imagegen-prompt.txt`. The header, favicons and home-screen icons
+all use exports of this artwork. The old unused SVG logos have been removed.
+
+After installing dependencies and Playwright Chromium, regenerate the committed
+assets with `pnpm icons:generate`. This exports transparent PNGs, a multi-size
+ICO, an opaque Apple touch icon, a maskable Android icon with safe padding, and
+a monochrome Safari pinned-tab mask. Regeneration is a development task and
+does not run during a production build.
+
 ## Deployment and OAuth recovery
 
 GitHub Actions checks pull requests and pushes to `master`, then deploys only a

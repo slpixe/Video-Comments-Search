@@ -36,6 +36,7 @@
     "vitest": "^4.1.11"
   },
   "scripts": {
+    "icons:generate": "node scripts/generate-icons.mjs",
     "start": "vite",
     "start:mock": "vite --mode mock",
     "typecheck": "tsc --noEmit",

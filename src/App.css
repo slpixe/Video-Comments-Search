@@ -22,8 +22,7 @@ a:focus-visible, button:focus-visible, [tabindex]:focus-visible {
 .skipLink:focus { top: 12px; }
 .masthead { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 68px; }
 .brand { display: flex; align-items: center; gap: 10px; }
-.brandMark { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 9px 9px 9px 3px; background: var(--accent); color: var(--surface); flex-shrink: 0; }
-.brandMark svg { font-size: 20px; }
+.brandMark { display: block; width: 40px; height: 40px; object-fit: contain; flex-shrink: 0; }
 .brand h1 { font-size: 15px; font-weight: 500; line-height: 1.4; margin: 0; }
 .brand h1 span { font-weight: 750; margin-right: 5px; }
 .appContent { flex: 1; }
