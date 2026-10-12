@@ -63,6 +63,14 @@ and comment data; they do not repeat or extend the real Google/YouTube
 verification recorded above. No credentials, scopes, DNS or policy content were
 changed for this interface release.
 
+Release `7c5a5c0` passed the [production workflow](https://github.com/slpixe/Video-Comments-Search/actions/runs/38317171921)
+and [GitHub Pages deployment](https://github.com/slpixe/Video-Comments-Search/actions/runs/38317337291).
+The live homepage returned HTTP 200, and its CSS matched the local release build
+byte for byte. The production browser showed the compact form and real Google
+login button without a demo banner. This post-deployment check stopped before
+sign-in; real login, filtering, pagination and replies have not been rechecked
+for this interface release.
+
 ## What Google's emails establish
 
 - **12 May 2026:** Google requested that the homepage and privacy policy move
