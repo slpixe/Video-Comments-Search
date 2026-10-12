@@ -5,6 +5,38 @@ Investigation date: 8 October 2026. Project: `video-comments-search`
 using the read-only gog connector and the Google Cloud Console. No email was sent.
 Deployment and OAuth configuration were updated with the owner’s authorization.
 
+## Current status (12 October 2026)
+
+The owner approved restricted API-key access for public comments plus basic
+Google login. Sign-in does not supply users with API keys or separate quota;
+comment requests use this app's project and shared quota. Earlier sections below
+record the investigation history, not instructions to submit the old scope review.
+
+- A dedicated key, **Video Comment Search live website**
+  (`1fd4f350-4c62-4488-b453-4a983129a609`), was created with HTTP referrer
+  `https://video-comment-search.slpixe.com/*` and **YouTube Data API v3 only**.
+  Existing API key 1 was left untouched. The browser build necessarily contains
+  the public key; its restrictions are the protection against other origins/APIs.
+- With explicit owner approval for the exact GitHub destination, the key was
+  saved as Actions secret `VITE_YOUTUBE_API_KEY` in
+  `slpixe/Video-Comments-Search`. No credential value is recorded in this document.
+- Console data access now declares only `openid`, `userinfo.email` and
+  `userinfo.profile`. The unused `youtube.readonly` declaration and its incorrect
+  justification were removed and saved. Verification centre confirms:
+  **Your branding has been verified and is being shown to users** and
+  **Verification is not required since your app is not requesting any sensitive
+  or restricted scopes**. No sensitive-scope submission or demo is needed for
+  this design. Do not resubmit approved branding.
+- The implementation requests basic login only, excludes previously granted
+  scopes, clears obsolete stored sessions, and sends the API key without the
+  Google token on both public comment and reply requests. API failures do not
+  incorrectly expire the user's Google session. Policies describe the actual
+  data flow and shared quota. The login gate is browser UI, not a server-enforced
+  quota/access boundary.
+- Local validation passed: type checking, 43 unit tests, 10 desktop/mobile E2E
+  tests and 9 Storybook browser checks. The regression first failed against the
+  old Bearer-token request. Deployment and real live checks are still pending.
+
 ## What Google's emails establish
 
 - **12 May 2026:** Google requested that the homepage and privacy policy move
@@ -166,7 +198,7 @@ The Console asks that domain ownership changes be given 24 hours before retrying
 branding verification. Do not claim ownership or scope verification is approved
 until Google confirms it.
 
-## Rollout order
+## Historical rollout order (superseded by current status)
 
 1. Verify the hostname in the GitHub account's Pages settings if not already
    covered by a verified `slpixe.com` domain. Configure

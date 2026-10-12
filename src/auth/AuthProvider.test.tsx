@@ -4,7 +4,7 @@ import type { ReactNode } from 'react';
 import { AuthProvider, useAuth } from './AuthProvider';
 import { storeToken, TOKEN_STORAGE_KEY } from './token';
 
-const google = vi.hoisted(() => ({ options: {} as { onSuccess: (response: { access_token: string; expires_in: number }) => void; onError: () => void; onNonOAuthError: (failure: { type: string }) => void }, login: vi.fn(), logout: vi.fn() }));
+const google = vi.hoisted(() => ({ options: {} as { scope: string; include_granted_scopes: boolean; onSuccess: (response: { access_token: string; expires_in: number }) => void; onError: () => void; onNonOAuthError: (failure: { type: string }) => void }, login: vi.fn(), logout: vi.fn() }));
 vi.mock('@react-oauth/google', () => ({
   GoogleOAuthProvider: ({ children }: { children: ReactNode }) => children,
   useGoogleLogin: (options: typeof google.options) => { google.options = options; return google.login; },
@@ -52,4 +52,10 @@ it('surfaces OAuth rejection', () => {
   renderSession();
   act(() => google.options.onError());
   expect(screen.getByRole('alert')).toHaveTextContent('could not sign you in');
+});
+
+it('requests basic login without collecting earlier YouTube grants', () => {
+  renderSession();
+  expect(google.options.scope).toBe('openid email profile');
+  expect(google.options.include_granted_scopes).toBe(false);
 });

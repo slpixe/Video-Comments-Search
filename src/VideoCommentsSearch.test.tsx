@@ -28,7 +28,7 @@ describe('VideoCommentsSearch', () => {
     expect(screen.queryByText('This is the first comment')).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Search' })).toBeDisabled();
   });
-  it('accepts links, sends the search term and bearer token, and preserves other URL parameters', async () => {
+  it('accepts links, sends the search term and app key without a Google token, and preserves other URL parameters', async () => {
     window.history.replaceState({}, '', '/?keep=yes#anchor');
     let requested: Request | undefined;
     server.use(http.get(`${YOUTUBE_API}/commentThreads`, ({ request }) => {
@@ -42,7 +42,8 @@ describe('VideoCommentsSearch', () => {
     await screen.findByText('No results found');
     expect(new URL(requested!.url).searchParams.get('videoId')).toBe('kJQP7kiw5Fk');
     expect(new URL(requested!.url).searchParams.get('searchTerms')).toBe('song');
-    expect(requested!.headers.get('Authorization')).toBe('Bearer mock-access-token');
+    expect(new URL(requested!.url).searchParams.get('key')).toBe('mock-youtube-api-key');
+    expect(requested!.headers.has('Authorization')).toBe(false);
     expect(window.location.search).toContain('keep=yes');
     expect(window.location.hash).toBe('#anchor');
   });
@@ -65,11 +66,12 @@ describe('VideoCommentsSearch', () => {
     await search(videoId);
     expect(await screen.findByText(message)).toBeInTheDocument();
   });
-  it('asks for login again after a 401', async () => {
+  it('keeps Google login when the independent API key is rejected', async () => {
     renderSearch();
-    await search('expired0000');
-    expect(await screen.findByRole('alert')).toHaveTextContent('session expired');
-    expect(screen.getByRole('button', { name: 'Login with Google' })).toBeInTheDocument();
+    await search('keybad00000');
+    expect(await screen.findByRole('alert')).toHaveTextContent('API key was rejected');
+    expect(screen.getByRole('button', { name: 'Logout' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Search' })).toBeEnabled();
   });
   it('rejects invalid IDs without making an API request', async () => {
     const called = vi.fn();

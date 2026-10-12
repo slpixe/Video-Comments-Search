@@ -4,7 +4,7 @@ import { Search as SearchIcon } from '@mui/icons-material';
 import YoutubeList from './components/youtubeList/YoutubeList';
 import Policy from './components/TermsAndPolicy';
 import { useAuth } from './auth/AuthProvider';
-import { parseVideoId, searchComments, YouTubeApiError } from './api/youtube';
+import { parseVideoId, searchComments } from './api/youtube';
 import type { CommentThread } from './types/youtube';
 import './App.css';
 
@@ -23,7 +23,7 @@ function VideoCommentsSearch() {
   const initial = getUrlParams();
   const [videoId, setVideoId] = useState(initial.videoId);
   const [query, setQuery] = useState(initial.query);
-  const { accessToken, error: authError, login, logout, expire, loginAvailable } = useAuth();
+  const { accessToken, error: authError, login, logout, loginAvailable } = useAuth();
   const [items, setItems] = useState<CommentThread[]>([]);
   const [nextPageToken, setNextPageToken] = useState<string>();
   const [isLoading, setIsLoading] = useState(false);
@@ -66,7 +66,7 @@ function VideoCommentsSearch() {
     setError(null);
     if (!nextPage) { setItems([]); setNextPageToken(undefined); updateUrl(id, query.trim(), true); }
     try {
-      const data = await searchComments(id, query.trim(), accessToken, nextPage ? nextPageToken : undefined, controller.signal);
+      const data = await searchComments(id, query.trim(), nextPage ? nextPageToken : undefined, controller.signal);
       if (controller.signal.aborted) return;
       setItems(previous => {
         const combined = nextPage ? [...previous, ...(data.items ?? [])] : data.items ?? [];
@@ -76,8 +76,7 @@ function VideoCommentsSearch() {
       setHasSearched(true);
     } catch (failure) {
       if (controller.signal.aborted) return;
-      if (failure instanceof YouTubeApiError && failure.status === 401) expire();
-      else setError(failure instanceof Error ? failure.message : 'Unable to search comments. Please try again.');
+      setError(failure instanceof Error ? failure.message : 'Unable to search comments. Please try again.');
     } finally {
       if (!controller.signal.aborted) setIsLoading(false);
     }
@@ -90,7 +89,7 @@ function VideoCommentsSearch() {
           <Typography variant="h6" component="h1" sx={{ fontWeight: 600 }}>Slpixe Video Comment Search</Typography>
           {accessToken && <Button variant="outlined" size="small" onClick={logout}>Logout</Button>}
         </Box>
-        <Typography color="text.secondary" sx={{ mb: 2 }}>Search and browse public comments and replies on YouTube videos. Sign in with Google to authorize read-only YouTube access.</Typography>
+        <Typography color="text.secondary" sx={{ mb: 2 }}>Search and browse public comments and replies on YouTube videos. Sign in with Google, then enter a video ID or link to search its public comments.</Typography>
         {import.meta.env.DEV && import.meta.env.VITE_ENABLE_MOCKS === 'true' && <Alert role="note" severity="info" sx={{ mb: 2 }}>Demo mode: login and comments are simulated.</Alert>}
         <form onSubmit={event => { event.preventDefault(); void performSearch(); }}>
           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} alignItems="flex-start">
@@ -114,7 +113,7 @@ function VideoCommentsSearch() {
         ) : (
           <>
             {error && <Alert severity="error" sx={{ m: 2 }}>{error}</Alert>}
-            {items.length > 0 && <><Typography role="status" sx={{ p: 2 }}>{items.length} comments loaded</Typography><YoutubeList items={items} accessToken={accessToken} /></>}
+            {items.length > 0 && <><Typography role="status" sx={{ p: 2 }}>{items.length} comments loaded</Typography><YoutubeList items={items} /></>}
             {isLoading && <Stack className="emptyState" alignItems="center"><CircularProgress aria-label="Loading comments" /></Stack>}
             {!isLoading && !error && items.length === 0 && <div className="emptyState"><Typography color="text.secondary">{hasSearched ? 'No results found' : 'Enter a video and search its comments.'}</Typography></div>}
             {nextPageToken && <Box sx={{ p: 2, textAlign: 'center' }}><Button variant="outlined" disabled={isLoading} onClick={() => void performSearch(true)}>Load more comments</Button></Box>}

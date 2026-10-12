@@ -37,16 +37,16 @@ test('search term filters comments and is shareable', async ({ page }) => {
   await expect(page.getByText('This is the first comment')).toHaveCount(0);
   await expect(page).toHaveURL(/query=great/);
 });
-test('empty, quota error and expired session', async ({ page }) => {
+test('empty, quota error and rejected API key', async ({ page }) => {
   await login(page);
   await search(page, 'empty000000');
   await expect(page.getByText('No results found')).toBeVisible();
   await search(page, 'quota000000');
   await expect(page.getByRole('alert')).toContainText('quota exceeded');
-  await search(page, 'expired0000');
-  await expect(page.getByRole('alert')).toContainText('session expired');
-  await expect(page.getByRole('button', { name: 'Search', exact: true })).toBeDisabled();
-  await expect(page.getByRole('button', { name: 'Login with Google' })).toBeVisible();
+  await search(page, 'keybad00000');
+  await expect(page.getByRole('alert')).toContainText('API key was rejected');
+  await expect(page.getByRole('button', { name: 'Search', exact: true })).toBeEnabled();
+  await expect(page.getByRole('button', { name: 'Logout' })).toBeVisible();
 });
 test('invalid input and accessible privacy link', async ({ page }) => {
   await login(page);

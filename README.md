@@ -4,10 +4,12 @@ Search public comments on a YouTube video, expand replies, and load further page
 Paste a video ID, a watch URL, a short link, or a Shorts link. Search terms are
 optional. Share a search using the `video` and `query` URL parameters.
 
-The custom domain prepared by this update is
-[video-comment-search.slpixe.com](https://video-comment-search.slpixe.com/).
-Until the domain rollout is complete, the existing site is at
-[GitHub Pages](https://slpixe.github.io/Video-Comments-Search/).
+The live site is [video-comment-search.slpixe.com](https://video-comment-search.slpixe.com/).
+
+Google login requests basic sign-in permissions only. Public comment and reply
+requests use the app owner's restricted YouTube API key, with no OAuth bearer
+token. Signing in does not supply a personal API key or separate project quota.
+The browser login gate is a user flow, not a server-enforced quota or access limit.
 
 ## Local development
 
@@ -29,19 +31,25 @@ search terms filter the fixture comments. The banner makes mock mode explicit.
 | `empty000000` | No results |
 | `quota000000` | Quota exceeded |
 | `disabled000` | Comments disabled |
-| `expired0000` | Expired Google session |
+| `keybad00000` | API key rejected (Google session stays signed in) |
 | `slow0000000` | Two-second response |
 
 `src/mocks/handlers.ts` is shared by the dev worker, Vitest's in-process mock
 server, and Storybook. There is no separate backend to start. After an MSW
 upgrade, regenerate its worker with `pnpm exec msw init public --save`.
 
-For real Google login, configure the public OAuth client ID in `.env.local`
-(see `.env.example`), allow your local origin in Google Cloud, and run
-`pnpm start`. Mocks are opt-in and disabled in production, even if built with
-`--mode mock`. OAuth client IDs are public browser configuration; never place
-client secrets or private API keys in `VITE_` variables. The existing `.env`
-contains only the public client ID and remains tracked for the deployment.
+For real login and searches, configure `VITE_GOOGLE_CLIENT_ID` and
+`VITE_YOUTUBE_API_KEY` in `.env.local` (see `.env.example`). Enable YouTube Data
+API v3, allow the local OAuth origin, and restrict a development API key to the
+exact local website origin and YouTube Data API v3. The production key permits
+only `https://video-comment-search.slpixe.com/*` and will reject local requests.
+Run `pnpm start`. Mocks are opt-in and disabled in production even with `--mode mock`.
+
+OAuth client IDs and website API keys are visible browser configuration. Never
+put OAuth client secrets, unrestricted keys or private server credentials in
+`VITE_` variables. Production obtains its restricted key from the repository's
+`VITE_YOUTUBE_API_KEY` Actions secret at build time; the compiled key is public.
+Tests and Storybook use a dummy key, and MSW rejects OAuth bearer requests.
 
 ## Checks and component development
 
@@ -65,8 +73,8 @@ failures, video URL parsing, HTTP errors, search, pagination, cancellation,
 navigation, and reply retry/caching. Playwright covers the complete mock user
 journey, query filtering, empty/error/session states, mobile layout and the
 privacy page. It cannot verify Google's live consent screen or app verification.
-Storybook includes logged-out, ready, results, empty, loading, quota error, expired
-session, and comment/reply states; several stories have interaction assertions.
+Storybook includes logged-out, ready, results, empty, loading, quota error, rejected
+API key, and comment/reply states; several stories have interaction assertions.
 
 The Playwright server uses port 4173. Keep that port free to avoid accidentally
 reusing an unrelated server. Traces and HTML reports are retained for failures.

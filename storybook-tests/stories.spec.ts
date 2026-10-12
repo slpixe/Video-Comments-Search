@@ -5,7 +5,7 @@ const cases = [
   ['search-app--results', 'This is the first comment'],
   ['search-app--empty', 'No results found'],
   ['search-app--quota-error', 'YouTube API quota exceeded. Please try again later.'],
-  ['search-app--expired-session', 'Your Google session expired. Please log in again.'],
+  ['search-app--api-key-error', 'The YouTube API key was rejected. Contact the app owner.'],
   ['search-comment--expanded', 'Great point!'],
   ['search-comment--reply-error', 'YouTube API error 502. Please try again.'],
 ];
@@ -13,7 +13,7 @@ for (const [storyId, text] of cases) {
   test(storyId, async ({ page }) => {
     const errors: string[] = [];
     page.on('pageerror', error => errors.push(error.message));
-    const expectedStatus: Record<string, number> = { 'search-app--quota-error': 403, 'search-app--expired-session': 401, 'search-comment--reply-error': 502 };
+    const expectedStatus: Record<string, number> = { 'search-app--quota-error': 403, 'search-app--api-key-error': 401, 'search-comment--reply-error': 502 };
     page.on('console', message => {
       if (message.type() !== 'error') return;
       // Chromium also logs the HTTP failures that these stories deliberately simulate.
