@@ -35,7 +35,23 @@ record the investigation history, not instructions to submit the old scope revie
   quota/access boundary.
 - Local validation passed: type checking, 43 unit tests, 10 desktop/mobile E2E
   tests and 9 Storybook browser checks. The regression first failed against the
-  old Bearer-token request. Deployment and real live checks are still pending.
+  old Bearer-token request. [PR #41](https://github.com/slpixe/Video-Comments-Search/pull/41)
+  passed CI and was merged as `2fe6c01`. Its production workflow and GitHub Pages
+  deployment both succeeded; live assets and the 12 October policies are published.
+- A genuine Google login with the existing owner account completed on the live
+  domain on 12 October. The visible account chooser named the approved app;
+  there was no unverified-app warning or YouTube-account permission prompt.
+  The actual login URL requested only basic sign-in scopes and
+  `include_granted_scopes=false`. No mock login or token injection was used.
+- Real YouTube calls now work: video `kJQP7kiw5Fk` with query `music` returned
+  **30 comments**, **Load more comments** increased the total to **60**, and
+  **Show replies** displayed a real reply. Clearing the query returned a fresh
+  page of **30 recent comments**. These checks establish that both comment
+  endpoints work with the deployed key. No comment was posted or edited.
+- Public DNS resolves to GitHub Pages. Homepage, privacy and terms returned
+  HTTP 200 with valid TLS. The credential-transfer temporary file was removed.
+  Recovery is complete; the follow-up automation can be deleted. Users share
+  the app project's quota; sign-in does not provision personal API keys.
 
 ## What Google's emails establish
 
