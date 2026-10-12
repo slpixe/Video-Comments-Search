@@ -53,6 +53,16 @@ record the investigation history, not instructions to submit the old scope revie
   Recovery is complete; the follow-up automation can be deleted. Users share
   the app project's quota; sign-in does not provision personal API keys.
 
+### Compact interface release (12 October 2026)
+
+The compact layout, aligned comment metadata and search-link copying retain the
+approved app name, basic login scopes and API-key-only public reads. Local
+release checks passed: type checking, 45 unit tests, 12 desktop/mobile E2E tests,
+9 Storybook browser checks, and the production build. These use simulated login
+and comment data; they do not repeat or extend the real Google/YouTube
+verification recorded above. No credentials, scopes, DNS or policy content were
+changed for this interface release.
+
 ## What Google's emails establish
 
 - **12 May 2026:** Google requested that the homepage and privacy policy move

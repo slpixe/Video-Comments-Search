@@ -1,8 +1,7 @@
 import { useState, useEffect, useRef } from "react";
-import { Alert, Button, Collapse, CircularProgress, Tooltip } from "@mui/material";
+import { Alert, Button, Collapse, CircularProgress, useMediaQuery } from "@mui/material";
 import {
   ThumbUpOutlined as ThumbUpOutlinedIcon,
-  ChatBubbleOutline as ChatBubbleOutlineIcon,
   ExpandMore as ExpandMoreIcon,
   ExpandLess as ExpandLessIcon,
 } from '@mui/icons-material';
@@ -10,9 +9,10 @@ import type { CommentThread, Reply } from "../types/youtube";
 
 import { listReplies } from '../api/youtube';
 
+const countFormat = new Intl.NumberFormat(undefined, { notation: 'compact', maximumFractionDigits: 1 });
+
 interface Props {
   item: CommentThread;
-  index: number;
 }
 
 function formatDate(iso: string): string {
@@ -23,7 +23,8 @@ function formatDate(iso: string): string {
   });
 }
 
-function CommentItem({ item, index }: Props) {
+function CommentItem({ item }: Props) {
+  const reducedMotion = useMediaQuery('(prefers-reduced-motion: reduce)');
   const [expanded, setExpanded] = useState(false);
   const [replies, setReplies] = useState<Reply[]>([]);
   const [repliesLoading, setRepliesLoading] = useState(false);
@@ -64,72 +65,65 @@ function CommentItem({ item, index }: Props) {
   }
 
   return (
-    <div className={`commentItem${index % 2 === 1 ? " commentItem--alt" : ""}`}>
-      <div className="commentItem__body">
-        <div className="commentItem__text">{textOriginal}</div>
-        <div className="commentItem__meta">
-          <span className="commentItem__author">{authorDisplayName}</span>
-          {likeCount > 0 && (
-            <span className="commentItem__stat">
+    <article className="commentItem" aria-label={`Comment by ${authorDisplayName}`}>
+      <div className="commentItem__content">
+        <div className="commentItem__body">
+          <div className="commentItem__text">{textOriginal}</div>
+          <div className="commentItem__meta">
+            <span className="commentItem__author" title={authorDisplayName}>{authorDisplayName}</span>
+            <time className="commentItem__date" dateTime={publishedAt} title={new Date(publishedAt).toLocaleString()}>{formatDate(publishedAt)}</time>
+            <span className="commentItem__stat" aria-label={`${likeCount} ${likeCount === 1 ? 'like' : 'likes'}`} title={`${likeCount.toLocaleString()} ${likeCount === 1 ? 'like' : 'likes'}`}>
               <ThumbUpOutlinedIcon fontSize="inherit" />
-              {likeCount}
+              {countFormat.format(likeCount)}
             </span>
-          )}
-          {hasReplies && (
-            <Tooltip title={expanded ? "Hide replies" : `${totalReplyCount} repl${totalReplyCount === 1 ? "y" : "ies"}`}>
+            {hasReplies ? (
               <button
                 type="button"
                 className="commentItem__stat commentItem__replyToggle"
                 onClick={toggleExpanded}
                 aria-label={expanded ? "Hide replies" : "Show replies"}
                 aria-expanded={expanded}
+                aria-controls={`replies-${item.id}`}
               >
-                <ChatBubbleOutlineIcon fontSize="inherit" />
-                <span className="commentItem__replyCount">{totalReplyCount}</span>
-                {expanded ? (
-                  <ExpandLessIcon fontSize="inherit" />
-                ) : (
-                  <ExpandMoreIcon fontSize="inherit" />
-                )}
+                {expanded ? <ExpandLessIcon fontSize="inherit" /> : <ExpandMoreIcon fontSize="inherit" />}
+                <span>{countFormat.format(totalReplyCount)} {totalReplyCount === 1 ? 'reply' : 'replies'}</span>
               </button>
-            </Tooltip>
-          )}
-          <span className="commentItem__date">{formatDate(publishedAt)}</span>
-        </div>
-      </div>
-
-      {hasReplies && (
-        <Collapse in={expanded}>
-          <div className="commentItem__replies">
-            {error && <Alert severity="error">{error}<Button onClick={() => void fetchReplies(Boolean(nextPageToken))}>Retry replies</Button></Alert>}
-            {repliesLoading ? (
-              <div style={{ display: "flex", justifyContent: "center", padding: 8 }}>
-                <CircularProgress size={20} aria-label="Loading replies" />
-              </div>
-            ) : (
-              replies.map((reply) => (
-                <div key={reply.id} className="replyItem">
-                  <div className="replyItem__body">
-                    <div className="replyItem__text">{reply.snippet.textOriginal}</div>
-                    <div className="replyItem__meta">
-                      <span className="replyItem__author">{reply.snippet.authorDisplayName}</span>
-                      {reply.snippet.likeCount > 0 && (
-                        <span className="commentItem__stat">
-                          <ThumbUpOutlinedIcon fontSize="inherit" />
-                          {reply.snippet.likeCount}
-                        </span>
-                      )}
-                      <span className="commentItem__date">{formatDate(reply.snippet.publishedAt)}</span>
-                    </div>
-                  </div>
-                </div>
-              ))
-            )}
-            {nextPageToken && !error && <Button disabled={repliesLoading} onClick={() => void fetchReplies(true)}>Load more replies</Button>}
+            ) : <span className="commentItem__noReplies" aria-label="No replies">—</span>}
           </div>
-        </Collapse>
-      )}
-    </div>
+        </div>
+
+        {hasReplies && (
+          <Collapse in={expanded} timeout={reducedMotion ? 0 : 'auto'}>
+            <div className="commentItem__replies" id={`replies-${item.id}`}>
+              {error && <Alert severity="error">{error}<Button onClick={() => void fetchReplies(Boolean(nextPageToken))}>Retry replies</Button></Alert>}
+              {repliesLoading ? (
+                <div style={{ display: "flex", justifyContent: "center", padding: 8 }}>
+                  <CircularProgress size={20} aria-label="Loading replies" />
+                </div>
+              ) : (
+                replies.map((reply) => (
+                  <article key={reply.id} className="replyItem" aria-label={`Reply by ${reply.snippet.authorDisplayName}`}>
+                    <div className="replyItem__body">
+                      <div className="replyItem__text">{reply.snippet.textOriginal}</div>
+                      <div className="replyItem__meta">
+                        <span className="replyItem__author" title={reply.snippet.authorDisplayName}>{reply.snippet.authorDisplayName}</span>
+                        <time className="commentItem__date" dateTime={reply.snippet.publishedAt} title={new Date(reply.snippet.publishedAt).toLocaleString()}>{formatDate(reply.snippet.publishedAt)}</time>
+                        <span className="commentItem__stat" aria-label={`${reply.snippet.likeCount} ${reply.snippet.likeCount === 1 ? 'like' : 'likes'}`} title={`${reply.snippet.likeCount.toLocaleString()} ${reply.snippet.likeCount === 1 ? 'like' : 'likes'}`}>
+                          <ThumbUpOutlinedIcon fontSize="inherit" />
+                          {countFormat.format(reply.snippet.likeCount)}
+                        </span>
+                        <span className="replyItem__threadSpacer" aria-hidden="true" />
+                      </div>
+                    </div>
+                  </article>
+                ))
+              )}
+              {nextPageToken && !error && <Button disabled={repliesLoading} onClick={() => void fetchReplies(true)}>Load more replies</Button>}
+            </div>
+          </Collapse>
+        )}
+      </div>
+    </article>
   );
 }
 

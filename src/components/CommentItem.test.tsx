@@ -7,7 +7,7 @@ import { MockAuthProvider } from '../mocks/MockAuthProvider';
 import { YOUTUBE_API } from '../api/youtube';
 import CommentItem from './CommentItem';
 
-function renderComment(index = 0) { render(<MockAuthProvider signedIn><CommentItem item={commentThreadsFixture.items[index]} index={index} /></MockAuthProvider>); }
+function renderComment(index = 0) { render(<MockAuthProvider signedIn><CommentItem item={commentThreadsFixture.items[index]} /></MockAuthProvider>); }
 it('expands replies from the keyboard and caches them', async () => {
   const called = vi.fn();
   server.events.on('request:start', called);

@@ -57,6 +57,33 @@ describe('VideoCommentsSearch', () => {
     expect(screen.getByRole('status')).toHaveTextContent('4 comments loaded');
     expect(screen.queryByRole('button', { name: 'Load more comments' })).not.toBeInTheDocument();
   });
+  it('copies the submitted video and query and links back to the selected video', async () => {
+    renderSearch();
+    const user = userEvent.setup();
+    await user.type(screen.getByLabelText('Search term'), 'great');
+    await search('https://youtu.be/kJQP7kiw5Fk');
+    await screen.findByText('Another great video!');
+    const write = vi.spyOn(navigator.clipboard, 'writeText').mockResolvedValue();
+    await user.click(screen.getByRole('button', { name: 'Copy search link' }));
+    expect(write).toHaveBeenCalledWith(window.location.href);
+    expect(window.location.search).toContain('video=kJQP7kiw5Fk&query=great');
+    expect(screen.getByRole('button', { name: 'Link copied' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Open on YouTube' })).toHaveAttribute('href', 'https://www.youtube.com/watch?v=kJQP7kiw5Fk');
+    await user.type(screen.getByLabelText('Search term'), 'new');
+    expect(screen.queryByRole('button', { name: 'Copy search link' })).not.toBeInTheDocument();
+  });
+  it('offers a selectable link when clipboard access is blocked', async () => {
+    renderSearch();
+    const user = await search();
+    await screen.findByText('This is the first comment');
+    vi.spyOn(navigator.clipboard, 'writeText').mockRejectedValue(new Error('Blocked'));
+    await user.click(screen.getByRole('button', { name: 'Copy search link' }));
+    const link = await screen.findByLabelText('Copy this search link');
+    expect(link).toHaveValue(window.location.href);
+    await user.click(link);
+    expect((link as HTMLInputElement).selectionStart).toBe(0);
+    expect((link as HTMLInputElement).selectionEnd).toBe(window.location.href.length);
+  });
   it.each([
     ['empty000000', 'No results found'],
     ['quota000000', 'YouTube API quota exceeded. Please try again later.'],

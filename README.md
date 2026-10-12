@@ -2,7 +2,9 @@
 
 Search public comments on a YouTube video, expand replies, and load further pages.
 Paste a video ID, a watch URL, a short link, or a Shorts link. Search terms are
-optional. Share a search using the `video` and `query` URL parameters.
+optional. Use **Copy search link** above the results to share the video and query;
+if clipboard access is unavailable, the app provides a selectable link. Searches
+use the `video` and `query` URL parameters.
 
 The live site is [video-comment-search.slpixe.com](https://video-comment-search.slpixe.com/).
 

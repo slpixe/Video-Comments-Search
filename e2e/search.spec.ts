@@ -37,6 +37,22 @@ test('search term filters comments and is shareable', async ({ page }) => {
   await expect(page.getByText('This is the first comment')).toHaveCount(0);
   await expect(page).toHaveURL(/query=great/);
 });
+test('copies a search link and keeps results accessible in dark mode', async ({ page, context }) => {
+  await page.emulateMedia({ colorScheme: 'dark', reducedMotion: 'reduce' });
+  await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+  await login(page);
+  await page.getByLabel('Search term').fill('great');
+  await search(page, 'https://youtu.be/kJQP7kiw5Fk');
+  await expect(page.getByText('Another great video!')).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Open on YouTube' })).toHaveAttribute('href', 'https://www.youtube.com/watch?v=kJQP7kiw5Fk');
+  await page.getByRole('button', { name: 'Copy search link' }).click();
+  await expect(page.getByRole('button', { name: 'Link copied' })).toBeVisible();
+  expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(page.url());
+  await page.getByRole('link', { name: 'Skip to comments' }).focus();
+  await page.keyboard.press('Enter');
+  await expect(page.getByRole('main', { name: 'Comment search results' })).toBeFocused();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+});
 test('empty, quota error and rejected API key', async ({ page }) => {
   await login(page);
   await search(page, 'empty000000');

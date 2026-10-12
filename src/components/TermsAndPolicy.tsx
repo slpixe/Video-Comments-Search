@@ -1,15 +1,14 @@
 const Policy = () => {
   return (
-    <div className="policyFooter">
+    <footer className="policyFooter pageWidth">
       <a
         href={`${import.meta.env.BASE_URL}privacy.html`}
         target="_blank"
         rel="noopener noreferrer"
-        style={{ opacity: 0.5, fontSize: "0.75rem" }}
       >
         Privacy &amp; Terms
       </a>
-    </div>
+    </footer>
   );
 };
 

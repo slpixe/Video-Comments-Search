@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
-import { Alert, Button, CircularProgress, InputAdornment, Stack, TextField, Typography, Box } from '@mui/material';
-import { Search as SearchIcon } from '@mui/icons-material';
+import { Alert, Button, CircularProgress, InputAdornment, TextField } from '@mui/material';
+import { SearchRounded, SmartDisplayOutlined, ForumOutlined, OpenInNewRounded } from '@mui/icons-material';
 import YoutubeList from './components/youtubeList/YoutubeList';
+import CopySearchLink from './components/CopySearchLink';
 import Policy from './components/TermsAndPolicy';
 import { useAuth } from './auth/AuthProvider';
 import { parseVideoId, searchComments } from './api/youtube';
@@ -30,6 +31,7 @@ function VideoCommentsSearch() {
   const [hasSearched, setHasSearched] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const request = useRef<AbortController | null>(null);
+  const selectedVideo = parseVideoId(videoId);
 
   function resetSearch() {
     request.current?.abort();
@@ -84,42 +86,55 @@ function VideoCommentsSearch() {
 
   return (
     <div className="appRoot">
-      <div className="appHeader">
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5, gap: 1 }}>
-          <Typography variant="h6" component="h1" sx={{ fontWeight: 600 }}>Slpixe Video Comment Search</Typography>
-          {accessToken && <Button variant="outlined" size="small" onClick={logout}>Logout</Button>}
-        </Box>
-        <Typography color="text.secondary" sx={{ mb: 2 }}>Search and browse public comments and replies on YouTube videos. Sign in with Google, then enter a video ID or link to search its public comments.</Typography>
-        {import.meta.env.DEV && import.meta.env.VITE_ENABLE_MOCKS === 'true' && <Alert role="note" severity="info" sx={{ mb: 2 }}>Demo mode: login and comments are simulated.</Alert>}
-        <form onSubmit={event => { event.preventDefault(); void performSearch(); }}>
-          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} alignItems="flex-start">
-            <TextField type="text" label="YouTube video ID or URL" helperText="Paste a video link or ID, e.g. kJQP7kiw5Fk" value={videoId} required
+      <a className="skipLink" href="#comment-results">Skip to comments</a>
+      <header className="masthead pageWidth">
+        <div className="brand">
+          <span className="brandMark" aria-hidden="true"><ForumOutlined /></span>
+          <h1><span>Slpixe</span> Video Comment Search</h1>
+        </div>
+        {accessToken && <Button variant="outlined" size="small" onClick={logout}>Logout</Button>}
+      </header>
+
+      <div className="pageWidth appContent">
+        {import.meta.env.DEV && import.meta.env.VITE_ENABLE_MOCKS === 'true' && <Alert className="demoNotice" role="note" severity="info">Demo mode: login and comments are simulated.</Alert>}
+
+        <section className="searchPanel" aria-label="Search video comments">
+          <form className="searchForm" onSubmit={event => { event.preventDefault(); void performSearch(); }}>
+            <TextField className="videoField" size="small" type="text" label="YouTube video ID or URL" placeholder="Paste a YouTube link or video ID" value={videoId} required
               onChange={event => { resetSearch(); setVideoId(event.target.value); }}
-              autoFocus size="small" sx={{ minWidth: 180, flex: 1 }} />
-            <TextField type="search" label="Search term" helperText="Leave blank to browse comments" value={query}
+              InputLabelProps={{ shrink: true }}
+              InputProps={{ startAdornment: <InputAdornment position="start"><SmartDisplayOutlined /></InputAdornment> }} />
+            <TextField className="queryField" size="small" type="search" label="Search term" placeholder="Leave blank to browse" value={query}
               onChange={event => { resetSearch(); setQuery(event.target.value); }}
-              size="small" sx={{ minWidth: 200, flex: 1 }} InputProps={{ startAdornment: <InputAdornment position="start"><SearchIcon fontSize="small" /></InputAdornment> }} />
-            <Button variant="contained" type="submit" disabled={isLoading || !accessToken} sx={{ height: 40 }}>Search</Button>
-          </Stack>
-        </form>
+              InputLabelProps={{ shrink: true }}
+              InputProps={{ startAdornment: <InputAdornment position="start"><SearchRounded /></InputAdornment> }} />
+            <Button className="searchButton" variant="contained" type="submit" startIcon={<SearchRounded />} disabled={isLoading || !accessToken}>Search</Button>
+          </form>
+          {!accessToken && <div className="loginPrompt">
+            <p>Please log in with Google to search comments.</p>
+            <Button variant="outlined" disabled={!loginAvailable} onClick={login}>Login with Google</Button>
+          </div>}
+        </section>
+
+        {authError && <Alert severity="error" className="searchAlert">{authError}</Alert>}
+        <main id="comment-results" tabIndex={-1} className="searchResultsList" aria-label="Comment search results" aria-busy={isLoading}>
+          <div className="resultsContent">
+            {accessToken && error && <Alert severity="error" className="searchAlert">{error}</Alert>}
+            {accessToken && items.length > 0 && <>
+              <div className="resultsHeader"><div className="resultsSummary"><p role="status">{items.length} {items.length === 1 ? 'comment' : 'comments'} loaded</p>
+                {selectedVideo && <a className="videoLink" href={`https://www.youtube.com/watch?v=${selectedVideo}`} target="_blank" rel="noopener noreferrer">Open on YouTube <OpenInNewRounded /></a>}
+              </div><CopySearchLink /></div>
+              <div className="commentList"><YoutubeList items={items} /></div>
+            </>}
+            {accessToken && isLoading && <div className="loadingState"><CircularProgress size={24} aria-label="Loading comments" /><p>Loading comments…</p></div>}
+            {accessToken && !isLoading && !error && items.length === 0 && <div className="emptyState">
+              {hasSearched && <h2>No results found</h2>}
+              <p>{hasSearched ? 'Try a different search term, or leave it blank to browse all comments.' : 'Enter a video and search its comments.'}</p>
+            </div>}
+            {accessToken && nextPageToken && <div className="pagination"><Button variant="outlined" disabled={isLoading} onClick={() => void performSearch(true)}>Load more comments</Button></div>}
+          </div>
+        </main>
       </div>
-      <main className="searchResultsList" aria-label="Comment search results" aria-busy={isLoading}>
-        {authError && <Alert severity="error" sx={{ m: 2 }}>{authError}</Alert>}
-        {!accessToken ? (
-          <Stack className="emptyState" alignItems="center" spacing={1.5}>
-            <Typography color="text.secondary">Please log in with Google to search comments.</Typography>
-            <Button variant="contained" size="small" disabled={!loginAvailable} onClick={login}>Login with Google</Button>
-          </Stack>
-        ) : (
-          <>
-            {error && <Alert severity="error" sx={{ m: 2 }}>{error}</Alert>}
-            {items.length > 0 && <><Typography role="status" sx={{ p: 2 }}>{items.length} comments loaded</Typography><YoutubeList items={items} /></>}
-            {isLoading && <Stack className="emptyState" alignItems="center"><CircularProgress aria-label="Loading comments" /></Stack>}
-            {!isLoading && !error && items.length === 0 && <div className="emptyState"><Typography color="text.secondary">{hasSearched ? 'No results found' : 'Enter a video and search its comments.'}</Typography></div>}
-            {nextPageToken && <Box sx={{ p: 2, textAlign: 'center' }}><Button variant="outlined" disabled={isLoading} onClick={() => void performSearch(true)}>Load more comments</Button></Box>}
-          </>
-        )}
-      </main>
       <Policy />
     </div>
   );

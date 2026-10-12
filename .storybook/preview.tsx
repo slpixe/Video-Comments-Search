@@ -1,5 +1,6 @@
 import type { Preview } from '@storybook/react-vite';
-import { CssBaseline, ThemeProvider, createTheme } from '@mui/material';
+import { CssBaseline, ThemeProvider } from '@mui/material';
+import { createAppTheme } from '../src/theme';
 import { mswLoader } from 'msw-storybook-addon/csf3';
 import { MockAuthProvider } from '../src/mocks/MockAuthProvider';
 import { handlers } from '../src/mocks/handlers';
@@ -15,6 +16,6 @@ const preview: Preview = {
   parameters: { layout: 'fullscreen', msw: handlers, auth: { signedIn: true } },
   globalTypes: { theme: { description: 'Color scheme', toolbar: { icon: 'circlehollow', items: ['light', 'dark'] } } },
   initialGlobals: { theme: 'light' },
-  decorators: [(Story, context) => <ThemeProvider theme={createTheme({ palette: { mode: context.globals.theme === 'dark' ? 'dark' : 'light' } })}><CssBaseline /><MockAuthProvider key={context.id} signedIn={context.parameters.auth.signedIn}><div style={{ height: '100vh' }}><Story /></div></MockAuthProvider></ThemeProvider>],
+  decorators: [(Story, context) => <ThemeProvider theme={createAppTheme(context.globals.theme === 'dark' ? 'dark' : 'light')}><CssBaseline /><MockAuthProvider key={context.id} signedIn={context.parameters.auth.signedIn}><div style={{ minHeight: '100vh' }}><Story /></div></MockAuthProvider></ThemeProvider>],
 };
 export default preview;
