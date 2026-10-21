@@ -71,6 +71,43 @@ login button without a demo banner. This post-deployment check stopped before
 sign-in; real login, filtering, pagination and replies have not been rechecked
 for this interface release.
 
+### Live health check (21 October 2026)
+
+- The live homepage, privacy policy and terms returned HTTP 200 over HTTPS;
+  the homepage TLS certificate passed verification.
+- A genuine Google login with the existing owner account completed on the live
+  website without an unverified-app warning or additional YouTube consent.
+  The login request contained basic openid/email/profile scopes and
+  `include_granted_scopes=false`. No mock login or token injection was used.
+- On video `kJQP7kiw5Fk`, searching for `music` returned 30 real comments,
+  loading another page increased the count to 60, and expanding a comment
+  displayed a real reply. Clearing the query returned 30 recent comments.
+- Current Google Auth Platform pages confirm that branding is verified and
+  shown to users, sensitive/restricted-scope verification is not required,
+  and the audience is External / In production. No OAuth configuration change,
+  sensitive-scope submission or demo is currently needed for this design.
+- The latest production [checks and deployment run](https://github.com/slpixe/Video-Comments-Search/actions/runs/38321648024)
+  and [Pages deployment](https://github.com/slpixe/Video-Comments-Search/actions/runs/38321771264)
+  succeeded for the 12 October icon release (`120f32f`). Type checking, coverage
+  tests, E2E tests, Storybook checks and the production build passed in that CI
+  run. The local suite was not rerun for this read-only production assessment.
+- GitHub returned no open issues or pull requests. These spot checks establish
+  current operation for the tested account/video; they do not establish uptime
+  history or success for every visitor. The app still has no visitor analytics
+  or production error-reporting integration, and its privacy policy explicitly
+  says it does not operate analytics or tracking.
+- Google's API metrics page, with the 30-day interval selected and all listed
+  credentials included, displayed 6 comment-thread requests and 3 reply
+  requests, both with 0% errors. This is a small, potentially delayed sample
+  including diagnostic traffic, not a visitor count. The quota page showed
+  no current or seven-day peak usage above 90%; it displayed a daily query
+  limit of 10,002 and current usage of 0, so it should not be treated as a
+  real-time counter for the successful requests just made.
+- A subsequent read-only check of Cloud Monitoring's Alerting page on 21 October
+  showed **0 alert policies** and an empty policy table for this project.
+  No quota alert policy is configured there. No alert policy or notification
+  channel was created during this check.
+
 ## What Google's emails establish
 
 - **12 May 2026:** Google requested that the homepage and privacy policy move

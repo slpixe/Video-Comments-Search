@@ -97,6 +97,11 @@ does not run during a production build.
 
 ## Deployment and OAuth recovery
 
+Optional PostHog usage/conversion and error reporting is described in
+[Monitoring setup](docs/monitoring.md). It requires production build configuration
+and project privacy settings before activation. Local and mock runs send no
+telemetry; there are no scheduled availability checks.
+
 GitHub Actions checks pull requests and pushes to `master`, then deploys only a
 successful `master` build to `gh-pages`. The redundant manual `gh-pages` CLI
 was removed; publishing now uses this checked workflow. Type checking, coverage tests,

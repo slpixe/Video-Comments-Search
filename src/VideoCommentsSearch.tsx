@@ -5,7 +5,8 @@ import YoutubeList from './components/youtubeList/YoutubeList';
 import CopySearchLink from './components/CopySearchLink';
 import Policy from './components/TermsAndPolicy';
 import { useAuth } from './auth/AuthProvider';
-import { parseVideoId, searchComments } from './api/youtube';
+import { getFailureReason, parseVideoId, searchComments } from './api/youtube';
+import { reportError, trackEvent } from './telemetry';
 import type { CommentThread } from './types/youtube';
 import './App.css';
 
@@ -61,6 +62,8 @@ function VideoCommentsSearch() {
     if (!accessToken || isLoading) return;
     const id = parseVideoId(videoId);
     if (!id) { setError('Enter a valid YouTube video ID or URL.'); return; }
+    const started = performance.now();
+    if (!nextPage) trackEvent('search_started', { has_query: Boolean(query.trim()) });
     request.current?.abort();
     const controller = new AbortController();
     request.current = controller;
@@ -70,6 +73,9 @@ function VideoCommentsSearch() {
     try {
       const data = await searchComments(id, query.trim(), nextPage ? nextPageToken : undefined, controller.signal);
       if (controller.signal.aborted) return;
+      const metrics = { result_count: data.items?.length ?? 0, duration_ms: performance.now() - started };
+      if (nextPage) trackEvent('comments_page_loaded', metrics);
+      else trackEvent('search_succeeded', { ...metrics, has_query: Boolean(query.trim()) });
       setItems(previous => {
         const combined = nextPage ? [...previous, ...(data.items ?? [])] : data.items ?? [];
         return combined.filter((item, index) => combined.findIndex(other => other.id === item.id) === index);
@@ -78,6 +84,9 @@ function VideoCommentsSearch() {
       setHasSearched(true);
     } catch (failure) {
       if (controller.signal.aborted) return;
+      const reason = getFailureReason(failure);
+      trackEvent(nextPage ? 'comments_page_failed' : 'search_failed', { reason, duration_ms: performance.now() - started });
+      reportError(failure, nextPage ? 'pagination' : 'search', reason);
       setError(failure instanceof Error ? failure.message : 'Unable to search comments. Please try again.');
     } finally {
       if (!controller.signal.aborted) setIsLoading(false);

@@ -7,7 +7,8 @@ import {
 } from '@mui/icons-material';
 import type { CommentThread, Reply } from "../types/youtube";
 
-import { listReplies } from '../api/youtube';
+import { getFailureReason, listReplies } from '../api/youtube';
+import { reportError, trackEvent } from '../telemetry';
 
 const countFormat = new Intl.NumberFormat(undefined, { notation: 'compact', maximumFractionDigits: 1 });
 
@@ -40,6 +41,7 @@ function CommentItem({ item }: Props) {
 
   async function fetchReplies(nextPage = false): Promise<void> {
     if (repliesLoading || (repliesFetched && !nextPage && !error)) return;
+    const started = performance.now();
     const controller = new AbortController();
     request.current = controller;
     setRepliesLoading(true);
@@ -47,11 +49,15 @@ function CommentItem({ item }: Props) {
     try {
       const data = await listReplies(topLevelComment.id, nextPage ? nextPageToken : undefined, controller.signal);
       if (controller.signal.aborted) return;
+      trackEvent('replies_loaded', { result_count: data.items?.length ?? 0, duration_ms: performance.now() - started });
       setReplies(previous => nextPage ? [...previous, ...(data.items ?? [])] : data.items ?? []);
       setNextPageToken(data.nextPageToken);
       setRepliesFetched(true);
     } catch (failure) {
       if (controller.signal.aborted) return;
+      const reason = getFailureReason(failure);
+      trackEvent('replies_failed', { reason, duration_ms: performance.now() - started });
+      reportError(failure, 'replies', reason);
       setError(failure instanceof Error ? failure.message : 'Unable to load replies.');
     } finally {
       if (!controller.signal.aborted) setRepliesLoading(false);
@@ -61,6 +67,7 @@ function CommentItem({ item }: Props) {
   function toggleExpanded(): void {
     const next = !expanded;
     setExpanded(next);
+    if (next) trackEvent('replies_opened');
     if (next) void fetchReplies(Boolean(error && nextPageToken));
   }
 
