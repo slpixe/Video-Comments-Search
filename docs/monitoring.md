@@ -33,8 +33,10 @@ client IP data, and enable stateless cookieless server hashing. The existing
 **Slpixe / Picary** project remains separate. The one-project limit is per
 organization; PostHog supports multiple organizations under one user account.
 The repository's PostHog ingestion-token secret and EU host variable are set.
-Production event ingestion, dashboard verification, and notifications are
-pending deployment and the first real usage check.
+The [usage dashboard](https://eu.posthog.com/project/315525/dashboard/1044543)
+contains daily visits, login/search funnels, search outcomes, engagement and
+failures. Notifications are not configured yet. The free plan was selected
+without adding a payment method.
 
 `video-comment-search@slpixe.com` is an inbound Cloudflare forwarding alias to
 the existing `slpixe@gmail.com` destination, applied through
@@ -57,7 +59,8 @@ It is not a separate mailbox and is not needed for another PostHog login.
 | `search_link_shared` | Clipboard success or manual fallback shown; fallback does not prove a copy occurred |
 | `$exception` | Runtime, render, startup and actionable handled failures |
 
-Create a dashboard with:
+The dashboard provides the core measures below; further breakdowns can be added
+as traffic grows:
 
 - Daily visits and estimated visitors. Cookieless counts are estimates, not
   authenticated users; ad blockers and privacy signals can reduce coverage.
@@ -80,10 +83,20 @@ server failures are reported. Abort/cancelled search requests are ignored.
 Original exception messages, causes, source excerpts, breadcrumbs, referrers,
 URL parameters, account details and arbitrary event properties are omitted.
 Only production `/assets/*.js` frame locations and line/column numbers survive.
-The browser user agent is retained because cookieless ingestion requires it
+The browser user agent is retained as `$raw_user_agent` because cookieless
+ingestion requires that exact field
 to calculate the server-side visitor hash. The initial production check exposed
 `cookieless_missing_user_agent` warnings when this required field was omitted;
-SDK and payload tests now assert that it is present.
+The expanded warning identifies `$raw_user_agent` as the required property;
+`$user_agent` does not satisfy it. SDK and payload tests assert the exact field.
+Chrome real login, search, replies and pagination were verified on 21 October.
+Chrome has Do Not Track enabled, so those interactions intentionally emit no
+telemetry. A separate clean, logged-out tab verifies pageview and controlled
+error ingestion without Google authentication. A corrected clean-tab check stored one pageview and one controlled runtime
+exception on 21 October; the exception also appeared as an Error Tracking issue.
+All six saved dashboard queries executed successfully. Search conversion has
+no recorded sample yet. Initial analytics include verification traffic and
+should not be interpreted as organic visits.
 No automatic clicks, recordings, console logs, network traces or performance
 autocapture are enabled. Do Not Track and Global Privacy Control disable the
 integration. Analytics never block app startup or an interaction.

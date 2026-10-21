@@ -91,11 +91,12 @@ for this interface release.
   succeeded for the 12 October icon release (`120f32f`). Type checking, coverage
   tests, E2E tests, Storybook checks and the production build passed in that CI
   run. The local suite was not rerun for this read-only production assessment.
-- GitHub returned no open issues or pull requests. These spot checks establish
-  current operation for the tested account/video; they do not establish uptime
-  history or success for every visitor. The app still has no visitor analytics
-  or production error-reporting integration, and its privacy policy explicitly
-  says it does not operate analytics or tracking.
+- At the start of this assessment, GitHub returned no open issues or pull
+  requests. These spot checks establish operation for the tested account/video;
+  they do not establish uptime history or success for every visitor. At that
+  point, analytics and production error reporting were absent. The subsequent
+  monitoring implementation and updated privacy policy are recorded in
+  [monitoring.md](monitoring.md).
 - Google's API metrics page, with the 30-day interval selected and all listed
   credentials included, displayed 6 comment-thread requests and 3 reply
   requests, both with 0% errors. This is a small, potentially delayed sample
