@@ -13,6 +13,7 @@
     "@mui/icons-material": "^5.18.0",
     "@mui/material": "^5.18.0",
     "@react-oauth/google": "^0.13.5",
+    "posthog-js": "^1.438.13",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },

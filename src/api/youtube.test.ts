@@ -1,6 +1,14 @@
 import { http, HttpResponse } from 'msw';
 import { server } from '../mocks/server';
-import { listReplies, parseVideoId, searchComments, YOUTUBE_API } from './youtube';
+import { getFailureReason, listReplies, parseVideoId, searchComments, YOUTUBE_API } from './youtube';
+
+it('classifies a referrer-rejected key separately from a forbidden video', async () => {
+  server.use(http.get(`${YOUTUBE_API}/commentThreads`, () => HttpResponse.json({ error: {
+    errors: [{ reason: 'forbidden' }], details: [{ reason: 'API_KEY_HTTP_REFERRER_BLOCKED' }],
+  } }, { status: 403 })));
+  const error = await searchComments('kJQP7kiw5Fk', '').catch(error => error);
+  expect(getFailureReason(error)).toBe('api_key');
+});
 
 it.each(['kJQP7kiw5Fk', ' https://youtu.be/kJQP7kiw5Fk?t=2 ', 'https://www.youtube.com/watch?v=kJQP7kiw5Fk', 'https://youtube.com/shorts/kJQP7kiw5Fk', 'https://youtube.com/embed/kJQP7kiw5Fk', 'https://youtube.com/live/kJQP7kiw5Fk'])('extracts a video ID from %s', input => {
   expect(parseVideoId(input)).toBe('kJQP7kiw5Fk');

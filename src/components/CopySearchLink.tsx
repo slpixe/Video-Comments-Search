@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Button, TextField } from '@mui/material';
 import { CheckRounded, LinkRounded } from '@mui/icons-material';
+import { trackEvent } from '../telemetry';
 
 export default function CopySearchLink() {
   const [copied, setCopied] = useState(false);
@@ -11,11 +12,13 @@ export default function CopySearchLink() {
   async function copy() {
     try {
       await navigator.clipboard.writeText(window.location.href);
+      trackEvent('search_link_shared', { method: 'clipboard' });
       setCopied(true);
       setManualLink('');
       clearTimeout(timeout.current);
       timeout.current = setTimeout(() => setCopied(false), 2500);
     } catch {
+      trackEvent('search_link_shared', { method: 'manual_fallback' });
       setManualLink(window.location.href);
     }
   }

@@ -1,6 +1,7 @@
-import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
 import { GoogleOAuthProvider, googleLogout, useGoogleLogin } from '@react-oauth/google';
 import { clearStoredToken, getStoredToken, storeToken } from './token';
+import { reportError, trackEvent } from '../telemetry';
 
 export interface AuthSession {
   accessToken: string | null;
@@ -20,7 +21,12 @@ export function useAuth(): AuthSession {
 function GoogleSession({ children }: { children: ReactNode }) {
   const [token, setToken] = useState(getStoredToken);
   const [error, setError] = useState<string | null>(null);
+  const initialSession = useRef(token);
+  useEffect(() => {
+    if (initialSession.current) { trackEvent('session_restored'); initialSession.current = null; }
+  }, []);
   const expire = useCallback(() => {
+    trackEvent('session_expired');
     clearStoredToken();
     setToken(null);
     setError('Your Google session expired. Please log in again.');
@@ -34,17 +40,25 @@ function GoogleSession({ children }: { children: ReactNode }) {
     scope: 'openid email profile',
     include_granted_scopes: false,
     onSuccess: (response) => {
+      trackEvent('login_succeeded');
       setToken(storeToken(response.access_token, response.expires_in));
       setError(null);
     },
-    onError: () => setError('Google could not sign you in. Please try again. If access is blocked, contact the app owner.'),
-    onNonOAuthError: (failure) => setError(failure.type === 'popup_failed_to_open'
+    onError: () => {
+      trackEvent('login_failed', { reason: 'oauth' });
+      reportError(new Error('Google login failed'), 'login');
+      setError('Google could not sign you in. Please try again. If access is blocked, contact the app owner.');
+    },
+    onNonOAuthError: (failure) => {
+      trackEvent('login_failed', { reason: failure.type === 'popup_failed_to_open' ? 'popup_blocked' : 'popup_closed' });
+      setError(failure.type === 'popup_failed_to_open'
       ? 'The login popup was blocked. Allow popups for this site and try again.'
-      : 'Google login was closed before it finished. Please try again.'),
+      : 'Google login was closed before it finished. Please try again.');
+    },
   });
   return <AuthContext.Provider value={{
     accessToken: token?.accessToken ?? null, error, expire, loginAvailable: true,
-    login: () => { setError(null); googleLogin(); },
+    login: () => { trackEvent('login_started'); setError(null); googleLogin(); },
     logout: () => { googleLogout(); clearStoredToken(); setToken(null); setError(null); },
   }}>{children}</AuthContext.Provider>;
 }
