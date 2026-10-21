@@ -10,7 +10,8 @@ it('keeps real SDK events ingestible and sanitizes the real exception format', (
   sdk.init('phc_test_project', { ...telemetryConfig, api_host: 'https://eu.i.posthog.com',
     request_batching: false, disable_compression: true });
   const event = sdk.capture('search_succeeded', { result_count: 30, has_query: true, duration_ms: 80 });
-  expect(event?.properties).toMatchObject({ distinct_id: '$posthog_cookieless', token: 'phc_test_project', $cookieless_mode: true, result_count: 30 });
+  expect(event?.properties).toMatchObject({ distinct_id: '$posthog_cookieless', token: 'phc_test_project', $cookieless_mode: true,
+    $user_agent: navigator.userAgent, result_count: 30 });
   const error = new TypeError('private-search-text');
   error.stack = 'TypeError: private-search-text\n    at search (https://video-comment-search.slpixe.com/assets/index-123.js?key=private-key:4:9)';
   const exception = sdk.captureException(error, { source: 'search', reason: 'network' });

@@ -80,6 +80,10 @@ server failures are reported. Abort/cancelled search requests are ignored.
 Original exception messages, causes, source excerpts, breadcrumbs, referrers,
 URL parameters, account details and arbitrary event properties are omitted.
 Only production `/assets/*.js` frame locations and line/column numbers survive.
+The browser user agent is retained because cookieless ingestion requires it
+to calculate the server-side visitor hash. The initial production check exposed
+`cookieless_missing_user_agent` warnings when this required field was omitted;
+SDK and payload tests now assert that it is present.
 No automatic clicks, recordings, console logs, network traces or performance
 autocapture are enabled. Do Not Track and Global Privacy Control disable the
 integration. Analytics never block app startup or an interaction.

@@ -38,6 +38,9 @@ export function sanitizeEvent(event: CaptureResult | null): CaptureResult | null
   const properties: Record<string, unknown> = {
     $current_url: `${productionOrigin}/`, $pathname: '/', $host: 'video-comment-search.slpixe.com',
     $process_person_profile: false, $geoip_disable: true, $cookieless_mode: true,
+    // Cookieless ingestion requires this field to generate its server-side visitor hash.
+    // Read the browser value directly so event properties cannot override it.
+    $user_agent: navigator.userAgent,
     token: import.meta.env.VITE_POSTHOG_KEY,
   };
   // Cookieless mode uses the SDK sentinel, not Google identity or persistent browser IDs.
