@@ -92,8 +92,11 @@ The expanded warning identifies `$raw_user_agent` as the required property;
 Chrome real login, search, replies and pagination were verified on 21 October.
 Chrome has Do Not Track enabled, so those interactions intentionally emit no
 telemetry. A separate clean, logged-out tab verifies pageview and controlled
-error ingestion without Google authentication. Initial analytics include this
-verification traffic and should not be interpreted as organic visits.
+error ingestion without Google authentication. A corrected clean-tab check stored one pageview and one controlled runtime
+exception on 21 October; the exception also appeared as an Error Tracking issue.
+All six saved dashboard queries executed successfully. Search conversion has
+no recorded sample yet. Initial analytics include verification traffic and
+should not be interpreted as organic visits.
 No automatic clicks, recordings, console logs, network traces or performance
 autocapture are enabled. Do Not Track and Global Privacy Control disable the
 integration. Analytics never block app startup or an interaction.
