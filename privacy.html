@@ -14,7 +14,7 @@
 </head>
 <body>
   <h1>Privacy Policy</h1>
-  <p>Last updated: 12 October 2026</p>
+  <p>Last updated: 21 October 2026</p>
 
   <h2>About This App</h2>
   <p>
@@ -24,8 +24,30 @@
 
   <h2>Data We Collect</h2>
   <p>
-    We do not operate an account database, analytics or tracking. Login state is kept in your
-    browser as described below. Google handles sign-in and API requests under its own privacy policy.
+    We do not operate an account database. Login state is kept in your browser as described below.
+    When configured, we use PostHog for limited usage statistics and error reporting on the production
+    website. Google handles sign-in and API requests under its own privacy policy.
+  </p>
+
+  <h2>Usage Statistics and Error Reporting</h2>
+  <p>
+    PostHog receives page visits and events such as login attempts, successful searches, empty results,
+    pagination, reply loading and search-link sharing. Events can include result counts, request duration,
+    browser and device category, and a general error category. Crash reports include the error type and
+    application JavaScript file locations; original error messages and source contents are removed.
+  </p>
+  <p>
+    We do not send Google login tokens, Google account details, YouTube API keys, video IDs, search terms,
+    comment contents or URL query strings to PostHog. We do not use session recordings or automatic
+    click/form capture. PostHog runs in cookieless mode without storing analytics cookies or identifiers
+    in browser storage. It receives normal network information when an event is sent and uses a
+    server-generated hash to estimate visitors; we disable IP-address storage and geolocation enrichment.
+    These statistics are not linked to your Google identity. We respect browser Do Not Track and Global
+    Privacy Control signals by disabling this telemetry.
+  </p>
+  <p>
+    See <a href="https://posthog.com/privacy" target="_blank" rel="noopener noreferrer">PostHog's privacy policy</a>
+    for information about its processing. Analytics failures do not prevent you from using the app.
   </p>
 
   <h2>Google OAuth &amp; YouTube API</h2>
