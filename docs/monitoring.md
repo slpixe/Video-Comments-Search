@@ -107,18 +107,41 @@ so production stacks initially refer to built JavaScript. If readable source
 stacks become necessary, add private source-map upload with a separate CI-only
 credential and remove maps from the published site artifact.
 
-## Quota alerts checked on 21 October 2026
+## Daily quota alerts (configured 22 October 2026)
 
-Cloud Monitoring's Alerting page for `video-comments-search` showed **0 alert
-policies** and an empty policy table. No quota alerts are configured there.
-No notification channels or policies were created as part of this check.
+The 21 October check found no alert policies. On 22 October, two enabled
+Cloud Monitoring policies were created in `video-comments-search`:
 
-Recommended next setup: notifications at 80% and 95% of the daily YouTube quota,
-with a confirmed delivery channel. Alerts do not stop abuse or allocate quota
-per user. Everyone shares the owner's project allowance; the browser login gate
-does not enforce per-user access or rate limits. Broader public use should be
-paired with a backend quota budget, rate limits and caching, with YouTube reads
-behind that enforcement boundary. Keep the existing UI login for now.
+| Policy | Trigger | Cloud Monitoring |
+| --- | --- | --- |
+| YouTube daily quota - 80% | Daily usage above 80% for 60 seconds | [Policy](https://console.cloud.google.com/monitoring/alerting/policies/3505798848509054420?project=video-comments-search) |
+| YouTube daily quota - 95% | Daily usage above 95% for 60 seconds | [Policy](https://console.cloud.google.com/monitoring/alerting/policies/8516710375029504344?project=video-comments-search) |
+
+Both notify `video-comment-search@slpixe.com`, which Cloudflare forwards to
+`slpixe@gmail.com`, through enabled email notification channel
+`8115622277028684820`. The [policy list](https://console.cloud.google.com/monitoring/alerting/policies?project=video-comments-search)
+shows both enabled. Error-report email notifications remain a separate task.
+
+The policies use Google's generated quota template: sum
+`serviceruntime.googleapis.com/quota/rate/net_usage` for quota metric
+`youtube.googleapis.com/default` within the current `America/Los_Angeles`
+calendar day, divided by `serviceruntime.googleapis.com/quota/limit` for
+`defaultPerDayPerProject`. The query evaluates every 30 seconds and follows
+the actual limit rather than hard-coding 10,000 units. It does not use a
+rolling 24-hour count or trigger on missing data as an availability signal.
+
+Verification: Service Usage returned an effective daily limit of 10,002.
+Evaluating the production policy's ratio expression returned
+`0.0007998400319936012` (8 / 10,002, approximately 0.08%), matching the quota
+Console. The API returned both policies and the email channel as enabled.
+No quota was deliberately consumed to force an incident, and delivery of a
+threshold notification has not yet been observed.
+
+Alerts do not stop abuse or allocate quota per user. Everyone shares the
+owner's project allowance; the browser login gate does not enforce per-user
+access or rate limits. Broader public use should be paired with a backend
+quota budget, rate limits and caching, with YouTube reads behind that
+enforcement boundary. Keep the existing UI login for now.
 
 References: [PostHog cookieless tracking](https://posthog.com/docs/privacy/data-collection),
 [event filtering and configuration](https://posthog.com/docs/libraries/js/config),
