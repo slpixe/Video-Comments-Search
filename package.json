@@ -19,22 +19,22 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.64.0",
-    "@storybook/addon-docs": "^10.6.1",
-    "@storybook/react-vite": "^10.6.1",
+    "@storybook/addon-docs": "^10.6.2",
+    "@storybook/react-vite": "^10.6.2",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.3",
     "@testing-library/user-event": "^14.6.7",
     "@types/react": "^18.3.31",
     "@types/react-dom": "^18.3.7",
     "@vitejs/plugin-react": "^6.1.2",
-    "@vitest/coverage-v8": "^4.1.11",
+    "@vitest/coverage-v8": "^4.1.12",
     "jsdom": "^29.1.1",
     "msw": "^2.15.0",
     "msw-storybook-addon": "^3.0.3",
     "storybook": "^10.6.2",
     "typescript": "7.0.2",
     "vite": "^8.3.3",
-    "vitest": "^4.1.11"
+    "vitest": "^4.1.12"
   },
   "scripts": {
     "icons:generate": "node scripts/generate-icons.mjs",
