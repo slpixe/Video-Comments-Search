@@ -35,8 +35,8 @@ organization; PostHog supports multiple organizations under one user account.
 The repository's PostHog ingestion-token secret and EU host variable are set.
 The [usage dashboard](https://eu.posthog.com/project/315525/dashboard/1044543)
 contains daily visits, login/search funnels, search outcomes, engagement and
-failures. Notifications are not configured yet. The free plan was selected
-without adding a payment method.
+failures. Daily error email checks are configured as described below. The free
+plan was selected without adding a payment method.
 
 `video-comment-search@slpixe.com` is an inbound Cloudflare forwarding alias to
 the existing `slpixe@gmail.com` destination, applied through
@@ -72,10 +72,40 @@ as traffic grows:
 - Search/reply latency and failures by reason; count pagination separately.
 - Reply and sharing engagement; show clipboard success separately from fallback.
 
-Create an error-tracking notification rule for new application issues in the
-selected project. Popup cancellation and normal unavailable-video conditions
-are usage events rather than exception reports. Quota, rejected-key, network and
-server failures are reported. Abort/cancelled search requests are ignored.
+Popup cancellation and normal unavailable-video conditions are usage events
+rather than exception reports. Quota, rejected-key, network and server failures
+are reported. Abort/cancelled search requests are ignored.
+
+## Daily error email (configured 22 October 2026)
+
+The [daily application error alert](https://eu.posthog.com/project/315525/alerts?alert_type=insights&alert_id=01a160fc-0e97-0000-8182-5a8b8d1cf7e8)
+uses the [Daily reported application errors insight](https://eu.posthog.com/project/315525/insights/EKnigYMI)
+in project 315525. It checks at **09:00 Europe/London**, including weekends,
+and evaluates the previous completed calendar day's `$exception` count.
+The threshold is **above zero**: a zero-error day does not trigger an email.
+The ongoing day is excluded and there is no additional evaluation delay.
+
+Delivery uses the existing verified PostHog owner account, `slpixe@gmail.com`,
+directly. PostHog insight alerts select subscribed users rather than arbitrary
+email aliases, so this delivery does not pass through the Cloudflare alias.
+Native issue-lifecycle notifications support chat/webhook destinations; this
+is a daily error-count email, not a new-issue notification rule.
+
+The alert is enabled. Its first scheduled check on 22 October is temporarily
+snoozed until **09:01 BST on 22 October** to avoid emailing about the deliberate
+21 October setup exception. The first unsnoozed daily check is **09:00 BST on
+23 October**, covering 22 October's activity. The temporary snooze expires
+automatically; no manual follow-up is required.
+
+Verification: the saved insight runs successfully, and API/UI readback confirms
+the daily schedule, completed-day evaluation, zero threshold, enabled state and
+owner recipient. Immediate test delivery was not performed, so inbox delivery
+has not yet been observed. The only historical exception at setup was the
+labelled controlled monitoring verification event.
+
+This checks reported errors only. It does not alert on zero visitors, missing
+events, or website availability. Do Not Track and Global Privacy Control
+continue to suppress telemetry.
 
 ## Privacy and diagnostic limits
 
@@ -84,16 +114,15 @@ Original exception messages, causes, source excerpts, breadcrumbs, referrers,
 URL parameters, account details and arbitrary event properties are omitted.
 Only production `/assets/*.js` frame locations and line/column numbers survive.
 The browser user agent is retained as `$raw_user_agent` because cookieless
-ingestion requires that exact field
-to calculate the server-side visitor hash. The initial production check exposed
-`cookieless_missing_user_agent` warnings when this required field was omitted;
+ingestion requires that exact field to calculate the server-side visitor hash. The initial production check exposed
+`cookieless_missing_user_agent` warnings when this required field was omitted.
 The expanded warning identifies `$raw_user_agent` as the required property;
 `$user_agent` does not satisfy it. SDK and payload tests assert the exact field.
 Chrome real login, search, replies and pagination were verified on 21 October.
 Chrome has Do Not Track enabled, so those interactions intentionally emit no
 telemetry. A separate clean, logged-out tab verifies pageview and controlled
-error ingestion without Google authentication. A corrected clean-tab check stored one pageview and one controlled runtime
-exception on 21 October; the exception also appeared as an Error Tracking issue.
+error ingestion without Google authentication. A corrected clean-tab check
+stored one pageview and one controlled runtime exception on 21 October; the exception also appeared as an Error Tracking issue.
 All six saved dashboard queries executed successfully. Search conversion has
 no recorded sample yet. Initial analytics include verification traffic and
 should not be interpreted as organic visits.
@@ -120,7 +149,7 @@ Cloud Monitoring policies were created in `video-comments-search`:
 Both notify `video-comment-search@slpixe.com`, which Cloudflare forwards to
 `slpixe@gmail.com`, through enabled email notification channel
 `8115622277028684820`. The [policy list](https://console.cloud.google.com/monitoring/alerting/policies?project=video-comments-search)
-shows both enabled. Error-report email notifications remain a separate task.
+shows both enabled. PostHog error emails are configured separately above.
 
 The policies use Google's generated quota template: sum
 `serviceruntime.googleapis.com/quota/rate/net_usage` for quota metric
