@@ -10,10 +10,10 @@ it('keeps conversion measures and cookieless ingestion fields without sending pr
     $current_url: 'https://video-comment-search.slpixe.com/?video=private-video&query=private-search',
     $referrer: 'https://example.com/?token=secret', $initial_current_url: 'private-url',
     $set: { email: 'private-email' }, $session_id: 'private-session',
-    query: 'private-search', videoId: 'private-video', has_query: true, result_count: 30, duration_ms: 123.4,
+    query: 'private-search', videoId: 'private-video', $raw_user_agent: 'private-override', has_query: true, result_count: 30, duration_ms: 123.4,
   }), $set: { email: 'private-email' }, $set_once: { token: 'secret' } });
   expect(result?.properties).toMatchObject({ token: 'phc_test_project', distinct_id: '$posthog_cookieless',
-    $cookieless_mode: true, has_query: true, result_count: 30, duration_ms: 123, $current_url: 'https://video-comment-search.slpixe.com/' });
+    $cookieless_mode: true, $raw_user_agent: navigator.userAgent, has_query: true, result_count: 30, duration_ms: 123, $current_url: 'https://video-comment-search.slpixe.com/' });
   expect(JSON.stringify(result)).not.toMatch(/private-|secret|youtube-key/);
   vi.unstubAllEnvs();
 });
